@@ -31,5 +31,10 @@ next-env.d.ts
 
 # local files
 Certi. Format*
+Aideathon_REPORT*
+Proposal Content*
+*.doc
+*.docx
+*.pptx
 
 # NOTE: .kiro MUST be committed for Kiroween hackathon validation!
