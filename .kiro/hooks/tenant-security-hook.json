@@ -1,0 +1,14 @@
+{
+  "name": "tenant-security-and-i18n-check",
+  "description": "Validates that all modified files maintain strict tenant_id scoping and do not introduce un-localized raw text strings",
+  "trigger": "pre-commit",
+  "actions": [
+    {
+      "type": "lint",
+      "rules": [
+        "check-tenant-isolation",
+        "check-i18n-coverage"
+      ]
+    }
+  ]
+}

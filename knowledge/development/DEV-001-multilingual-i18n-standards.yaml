@@ -1,0 +1,24 @@
+id: DEV-001
+type: development
+title: Internationalization (i18n) and Localized Prompting
+domain: internationalization
+status: approved
+version: "1.0.0"
+rule: |
+  All user-facing UI text MUST be internationalized using standardized locale resource bundles.
+  AI agent system prompts MUST dynamically incorporate the active tenant/user locale to ensure
+  outputs and reasoning summaries are returned in the requested language.
+do:
+  - Use `next-intl` or equivalent type-safe localization bundles for all UI strings.
+  - Support English (en), Spanish (es), French (fr), German (de), Japanese (ja), Hindi (hi), and Arabic (ar).
+  - Include bidirectional (RTL) layout support for Arabic.
+  - Inject localized steering instructions into AI agents: "Always respond and format reports in {locale}".
+dont:
+  - Never hardcode user-facing strings directly in JSX or templates.
+  - Never generate English-only agent responses when a tenant has configured a non-English default locale.
+reason: |
+  Ensures global applicability and accessibility, enabling international tenants to adopt the SaaS
+  seamlessly while empowering agents to process and output multilingual intelligence.
+related_items:
+  - ARCH-001
+  - PROD-001

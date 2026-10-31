@@ -1,0 +1,25 @@
+id: PROD-001
+type: product
+title: Turnkey Settings Page & Feature Toggle Control
+domain: product-experience
+status: approved
+version: "1.0.0"
+rule: |
+  The tenant settings page MUST provide intuitive toggles and configuration forms for all 3 agent modules
+  (Document Intelligence, Customer Support Swarm, Code Compliance Auditor), plus workspace branding,
+  locale selection, and token budget management.
+do:
+  - Provide immediate visual feedback when toggling modules on/off (with real-time sidebar updates).
+  - Include inline configuration modals for each module (e.g. allowed document types, support SLA thresholds, GitHub repos).
+  - Display current token usage vs. monthly budget limit with clear progress bars.
+  - Provide a one-click "Switch Preset" button allowing demo testers to instantly convert the tenant into a Legal SaaS, Support SaaS, or DevSecOps SaaS.
+dont:
+  - Never require server redeployment or environment restarts to enable or configure a module.
+  - Never allow non-Admin tenant members to alter module enablement or billing settings.
+reason: |
+  Provides immediate hackathon demo impact, showcasing how one tenant can be a Legal SaaS in Japanese
+  while another tenant on the same platform is a DevSecOps auditor in English with zero code changes.
+related_items:
+  - ARCH-001
+  - ARCH-002
+  - DEV-001

@@ -1,0 +1,24 @@
+id: ARCH-001
+type: architecture
+title: Multi-Tenant Data & Workspace Isolation
+domain: multi-tenancy
+status: approved
+version: "1.0.0"
+rule: |
+  All application queries, mutations, agent execution contexts, document stores, and audit logs
+  MUST be strictly scoped to a valid `tenant_id`. Cross-tenant data leakage is strictly prohibited.
+do:
+  - Enforce `tenant_id` foreign keys on every tenant-scoped entity in the database.
+  - Automatically inject tenant isolation filters at the ORM/database middleware layer.
+  - Resolve tenant context early in the request lifecycle via edge middleware (subdomain or path).
+  - Scope all LLM token consumption and background tasks to the active tenant's budget ledger.
+dont:
+  - Never execute global database queries without an explicit `tenant_id` filter.
+  - Never store tenant files or documents in unpartitioned global directories.
+  - Never allow one tenant to query or trigger agents belonging to another tenant.
+reason: |
+  In a multi-tenant SaaS architecture, data privacy, compliance, and tenant security are paramount.
+  A leak between tenants represents a critical vulnerability.
+related_items:
+  - ARCH-002
+  - PROD-001

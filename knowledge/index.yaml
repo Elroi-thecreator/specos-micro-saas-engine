@@ -1,0 +1,22 @@
+knowledge_units_count: 4
+last_updated: "2026-10-31"
+domains:
+  architecture:
+    - id: ARCH-001
+      title: Multi-Tenant Data & Workspace Isolation
+      file: architecture/ARCH-001-multi-tenant-isolation.yaml
+      status: approved
+    - id: ARCH-002
+      title: Modular Agent Capabilities & Configuration Engine
+      file: architecture/ARCH-002-modular-agent-registry.yaml
+      status: approved
+  development:
+    - id: DEV-001
+      title: Internationalization (i18n) and Localized Prompting
+      file: development/DEV-001-multilingual-i18n-standards.yaml
+      status: approved
+  product:
+    - id: PROD-001
+      title: Turnkey Settings Page & Feature Toggle Control
+      file: product/PROD-001-configurable-module-settings.yaml
+      status: approved

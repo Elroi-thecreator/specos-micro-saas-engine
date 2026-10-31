@@ -1,0 +1,24 @@
+id: ARCH-002
+type: architecture
+title: Modular Agent Capabilities & Configuration Engine
+domain: agent-orchestration
+status: approved
+version: "1.0.0"
+rule: |
+  Autonomous agent capabilities (Document Intelligence, Customer Support, Code Compliance) MUST be
+  built as decoupled, pluggable modules that can be dynamically toggled and configured per tenant
+  via the tenant settings store.
+do:
+  - Structure each capability module with its own specification, tools, prompt templates, and UI components.
+  - Check the tenant's enabled modules before rendering sidebar items or executing module API routes.
+  - Store module configuration parameters in the tenant settings schema as validated JSON.
+  - Dynamically load and register Kiro Crew agents based on the tenant's active module flags.
+dont:
+  - Never hardcode agent workflows directly into top-level layouts without tenant module feature checks.
+  - Never allow API execution for a module that is disabled in the tenant's configuration.
+reason: |
+  Enables the "Skeleton Crew" paradigm: a single unified SaaS platform can instantly morph into any
+  specialized micro-SaaS product (legal tech, customer support, or dev tool) simply via configuration.
+related_items:
+  - ARCH-001
+  - PROD-001
