@@ -16,7 +16,7 @@ domains:
       file: development/DEV-001-multilingual-i18n-standards.yaml
       status: approved
     - id: DEV-002
-      title: Enterprise-Grade UI/UX Design System
+      title: Enterprise-Grade Light UI/UX Design System
       file: development/DEV-002-enterprise-design-system.yaml
       status: approved
   product:

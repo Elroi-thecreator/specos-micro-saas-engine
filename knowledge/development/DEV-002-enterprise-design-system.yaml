@@ -1,27 +1,26 @@
 id: DEV-002
 type: development
-title: Enterprise-Grade UI/UX Design System
+title: Enterprise-Grade Light UI/UX Design System
 domain: frontend-design
 status: approved
-version: "1.0.0"
+version: "2.0.0"
 rule: |
-  All user interfaces across the platform MUST adhere to the Enterprise Design System:
-  Linear/Vercel obsidian aesthetic (#09090b background), subtle neutral zinc borders (zinc-800/80),
-  refined typography with crisp tracking, tabular numeric fonts for financial/token metrics,
-  cohesive badge status indicators, and sleek micro-interactions.
+  All user interfaces across the platform MUST adhere to the Enterprise Light Design System:
+  Stripe/Linear crisp light aesthetic with porcelain/white backgrounds (#f8fafc / #ffffff),
+  subtle neutral borders (slate-200/80), high-contrast slate typography (slate-900 / slate-600),
+  refined micro-shadows (shadow-sm), soft tinted status badges, and professional light-mode micro-interactions.
 do:
-  - Use deep neutral obsidian/zinc background (#09090b / #0c0e14) with subtle radial mesh glow.
-  - Implement 1px refined border highlights with hover transitions (border-zinc-800 to border-zinc-700).
-  - Use monospace fonts (font-mono) for all IDs, tokens, timestamps, and code artifacts.
-  - Design unified status indicators (green for healthy/low risk, amber for warnings, red for high risk/critical).
-  - Support high-contrast dark theme with full RTL adaptability for Arabic locale.
+  - Use clean porcelain/white background (#f8fafc / #ffffff) with crisp contrast.
+  - Implement 1px refined border highlights (border-slate-200 to border-slate-300).
+  - Use high-contrast slate text (text-slate-900 headers, text-slate-600 body, font-mono for metrics).
+  - Use soft-tinted status badges (emerald-50/emerald-700, amber-50/amber-700, rose-50/rose-700).
+  - Support full RTL adaptability for Arabic locale in light mode.
 dont:
-  - Never use harsh, saturated full-color background cards.
-  - Never use plain browser dropdowns with unstyled borders.
-  - Never render unaligned metric grids or inconsistent badge dimensions.
+  - Never use dark obsidian or low-contrast gray-on-black cards.
+  - Never use harsh primary color fills for entire background cards.
 reason: |
-  Enterprise customers and hackathon judges expect a modern, polished product feel comparable
-  to Stripe, Linear, or Vercel. Professional aesthetic builds immediate credibility.
+  Many enterprise teams and executive evaluators prefer a crisp, high-visibility light theme
+  resembling modern Stripe, Notion, Linear Light, and Apple developer dashboards.
 related_items:
   - DEV-001
   - PROD-001
