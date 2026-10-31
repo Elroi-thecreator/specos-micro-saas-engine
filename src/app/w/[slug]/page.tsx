@@ -14,6 +14,9 @@ import {
   CheckCircle2,
   Clock,
   Layers,
+  Activity,
+  ArrowUpRight,
+  TrendingUp,
 } from 'lucide-react';
 
 export default function WorkspaceDashboard() {
@@ -27,199 +30,277 @@ export default function WorkspaceDashboard() {
     Math.round((settings.tokensConsumed / settings.tokenBudgetMonthly) * 100)
   );
 
+  const recentEvents = [
+    {
+      id: 'ev-1',
+      action: 'Contract Risk Evaluation completed',
+      detail: 'Master Cloud Agreement - VendorX.pdf audited in Japanese',
+      time: '12m ago',
+      agent: 'Kiro Legal Agent',
+      status: 'High Risk Flagged',
+    },
+    {
+      id: 'ev-2',
+      action: 'Autonomous Support Reply dispatched',
+      detail: 'Ticket #tkt-001 localized and sent in Spanish',
+      time: '45m ago',
+      agent: 'Kiro Support Swarm',
+      status: 'Delivered',
+    },
+    {
+      id: 'ev-3',
+      action: 'Spec & Architecture Audit executed',
+      detail: 'github.com/acme-org/payment-gateway (feat/multi-tenant-sync)',
+      time: '2h ago',
+      agent: 'Kiro Sentinel',
+      status: 'Score 94/100',
+    },
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Workspace Banner */}
-      <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 p-8 shadow-xl relative overflow-hidden">
-        <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs text-emerald-400 font-mono mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Workspace: {activeTenant.slug} &bull; Tier: {activeTenant.tier}</span>
+    <div className="space-y-8 max-w-6xl">
+      {/* Workspace Executive Header */}
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-7 relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                Active Tenant &bull; {activeTenant.slug}
+              </span>
+              <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60">
+                {activeTenant.tier} Plan
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              {settings.branding.name || activeTenant.name}
+            </h1>
+            <p className="text-zinc-400 text-xs sm:text-sm mt-1 max-w-xl">
+              {settings.branding.tagline || 'Autonomous Micro-SaaS Engine configured for your enterprise requirements.'}
+            </p>
           </div>
 
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">
-            {settings.branding.name || activeTenant.name}
-          </h1>
-          <p className="text-slate-400 mt-2 max-w-2xl text-sm leading-relaxed">
-            {settings.branding.tagline || 'Autonomous Micro-SaaS Engine configured for your enterprise requirements.'}
-          </p>
-
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2.5 shrink-0">
             <Link
               href={`/w/${activeTenant.slug}/settings`}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors shadow-lg shadow-emerald-950"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-950 font-semibold text-xs transition-colors shadow-sm"
             >
-              <Settings className="w-4 h-4" />
-              <span>{t('settings.title')}</span>
+              <Settings className="w-3.5 h-3.5" />
+              <span>Workspace Settings</span>
             </Link>
-            <span className="text-xs text-slate-400">
-              Default Locale: <strong className="text-slate-300 font-mono">{settings.defaultLocale.toUpperCase()}</strong>
-            </span>
           </div>
         </div>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">Active Modules</span>
+      {/* KPI Metrics Ribbon */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Metric 1 */}
+        <div className="p-5 rounded-xl bg-zinc-900/40 border border-zinc-800/80">
+          <div className="flex items-center justify-between text-zinc-400 mb-2">
+            <span className="text-[11px] font-medium uppercase tracking-wider">Active Modules</span>
             <Layers className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-3xl font-black text-white">{activeCount} / 3</div>
-          <p className="text-xs text-slate-400 mt-2">
-            Configure more modules anytime in Workspace Settings.
-          </p>
+          <div className="text-2xl font-black text-white">{activeCount} / 3</div>
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-400 font-medium">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>Configurable on demand</span>
+          </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">{t('common.monthlyQuota')}</span>
+        {/* Metric 2 */}
+        <div className="p-5 rounded-xl bg-zinc-900/40 border border-zinc-800/80">
+          <div className="flex items-center justify-between text-zinc-400 mb-2">
+            <span className="text-[11px] font-medium uppercase tracking-wider">{t('header.tokensUsed')}</span>
             <Coins className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-3xl font-black text-white">{percentUsed}%</div>
-          <div className="w-full h-1.5 bg-slate-800 rounded-full mt-3 overflow-hidden">
+          <div className="text-2xl font-black text-white">{percentUsed}%</div>
+          <div className="w-full h-1 bg-zinc-800 rounded-full mt-2.5 overflow-hidden">
             <div
               className={`h-full ${percentUsed > 80 ? 'bg-rose-500' : 'bg-amber-400'}`}
               style={{ width: `${percentUsed}%` }}
             />
           </div>
-          <p className="text-xs text-slate-400 mt-2 font-mono">
-            {settings.tokensConsumed.toLocaleString()} / {settings.tokenBudgetMonthly.toLocaleString()} {t('common.tokens')}
-          </p>
+          <span className="text-[10px] text-zinc-400 font-mono block mt-1.5">
+            {settings.tokensConsumed.toLocaleString()} / {settings.tokenBudgetMonthly.toLocaleString()}
+          </span>
         </div>
 
-        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">Agent Health</span>
-            <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+        {/* Metric 3 */}
+        <div className="p-5 rounded-xl bg-zinc-900/40 border border-zinc-800/80">
+          <div className="flex items-center justify-between text-zinc-400 mb-2">
+            <span className="text-[11px] font-medium uppercase tracking-wider">{t('header.activeLocale')}</span>
+            <Sparkles className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-3xl font-black text-emerald-400">100% Ready</div>
-          <p className="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-slate-400" />
-            Zero cross-tenant leakage detected.
-          </p>
+          <div className="text-2xl font-black text-white uppercase font-mono">
+            {settings.defaultLocale}
+          </div>
+          <span className="text-[11px] text-zinc-400 mt-2 block">
+            7 Locales + RTL Supported
+          </span>
+        </div>
+
+        {/* Metric 4 */}
+        <div className="p-5 rounded-xl bg-zinc-900/40 border border-zinc-800/80">
+          <div className="flex items-center justify-between text-zinc-400 mb-2">
+            <span className="text-[11px] font-medium uppercase tracking-wider">Tenant Security</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div className="text-2xl font-black text-emerald-400">Isolated</div>
+          <span className="text-[11px] text-zinc-400 mt-2 block font-mono">
+            0 leaks &bull; ARCH-001 active
+          </span>
         </div>
       </div>
 
-      {/* Enabled Capabilities Grid */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-200">
-            Active Capabilities for this Workspace
-          </h2>
-          <Link
-            href={`/w/${activeTenant.slug}/settings`}
-            className="text-xs text-emerald-400 hover:text-emerald-300 font-medium"
-          >
-            Manage Capabilities &rarr;
-          </Link>
-        </div>
+      {/* Main Workspace Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column: Configured Modules Cards */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+              Autonomous Modules
+            </h2>
+            <Link
+              href={`/w/${activeTenant.slug}/settings`}
+              className="text-xs text-emerald-400 hover:text-emerald-300 font-medium"
+            >
+              Toggle Modules &rarr;
+            </Link>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Doc Intel Card */}
           <div
-            className={`p-6 rounded-2xl border transition-all flex flex-col justify-between ${
+            className={`p-5 rounded-xl border transition-all ${
               modules.docIntel
-                ? 'bg-slate-900/60 border-slate-800 hover:border-emerald-500/50'
-                : 'bg-slate-900/20 border-slate-800/40 opacity-50'
+                ? 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
+                : 'bg-zinc-900/20 border-zinc-800/40 opacity-50'
             }`}
           >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-teal-950 border border-teal-800/60 flex items-center justify-center text-teal-400 mb-4">
-                <FileText className="w-5 h-5" />
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-teal-950/80 border border-teal-800/60 flex items-center justify-center text-teal-400 shrink-0">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-white">{t('settings.docIntelTitle')}</h3>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                    {t('settings.docIntelDesc')}
+                  </p>
+                </div>
               </div>
-              <h3 className="font-bold text-white text-base">{t('settings.docIntelTitle')}</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                {t('settings.docIntelDesc')}
-              </p>
-            </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-800/80">
               {modules.docIntel ? (
                 <Link
                   href={`/w/${activeTenant.slug}/documents`}
-                  className="flex items-center justify-between text-xs font-semibold text-teal-400 hover:text-teal-300"
+                  className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-medium transition-colors shrink-0 flex items-center gap-1"
                 >
-                  <span>Launch Intelligence Room</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>Open</span>
+                  <ArrowRight className="w-3 h-3" />
                 </Link>
               ) : (
-                <span className="text-xs text-slate-400 font-medium italic">
-                  Disabled &bull; Enable in Settings
-                </span>
+                <span className="text-[11px] text-zinc-400 font-mono italic shrink-0">Disabled</span>
               )}
             </div>
           </div>
 
           {/* Support Swarm Card */}
           <div
-            className={`p-6 rounded-2xl border transition-all flex flex-col justify-between ${
+            className={`p-5 rounded-xl border transition-all ${
               modules.supportSwarm
-                ? 'bg-slate-900/60 border-slate-800 hover:border-amber-500/50'
-                : 'bg-slate-900/20 border-slate-800/40 opacity-50'
+                ? 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
+                : 'bg-zinc-900/20 border-zinc-800/40 opacity-50'
             }`}
           >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-amber-950 border border-amber-800/60 flex items-center justify-center text-amber-400 mb-4">
-                <MessageSquare className="w-5 h-5" />
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-amber-950/80 border border-amber-800/60 flex items-center justify-center text-amber-400 shrink-0">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-white">{t('settings.supportSwarmTitle')}</h3>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                    {t('settings.supportSwarmDesc')}
+                  </p>
+                </div>
               </div>
-              <h3 className="font-bold text-white text-base">{t('settings.supportSwarmTitle')}</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                {t('settings.supportSwarmDesc')}
-              </p>
-            </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-800/80">
               {modules.supportSwarm ? (
                 <Link
                   href={`/w/${activeTenant.slug}/support`}
-                  className="flex items-center justify-between text-xs font-semibold text-amber-400 hover:text-amber-300"
+                  className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-medium transition-colors shrink-0 flex items-center gap-1"
                 >
-                  <span>Open Support Operations</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>Open</span>
+                  <ArrowRight className="w-3 h-3" />
                 </Link>
               ) : (
-                <span className="text-xs text-slate-400 font-medium italic">
-                  Disabled &bull; Enable in Settings
-                </span>
+                <span className="text-[11px] text-zinc-400 font-mono italic shrink-0">Disabled</span>
               )}
             </div>
           </div>
 
           {/* Code Audit Card */}
           <div
-            className={`p-6 rounded-2xl border transition-all flex flex-col justify-between ${
+            className={`p-5 rounded-xl border transition-all ${
               modules.codeAudit
-                ? 'bg-slate-900/60 border-slate-800 hover:border-blue-500/50'
-                : 'bg-slate-900/20 border-slate-800/40 opacity-50'
+                ? 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
+                : 'bg-zinc-900/20 border-zinc-800/40 opacity-50'
             }`}
           >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-blue-950 border border-blue-800/60 flex items-center justify-center text-blue-400 mb-4">
-                <ShieldAlert className="w-5 h-5" />
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-950/80 border border-blue-800/60 flex items-center justify-center text-blue-400 shrink-0">
+                  <ShieldAlert className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-white">{t('settings.codeAuditTitle')}</h3>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                    {t('settings.codeAuditDesc')}
+                  </p>
+                </div>
               </div>
-              <h3 className="font-bold text-white text-base">{t('settings.codeAuditTitle')}</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                {t('settings.codeAuditDesc')}
-              </p>
-            </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-800/80">
               {modules.codeAudit ? (
                 <Link
                   href={`/w/${activeTenant.slug}/code-audit`}
-                  className="flex items-center justify-between text-xs font-semibold text-blue-400 hover:text-blue-300"
+                  className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-medium transition-colors shrink-0 flex items-center gap-1"
                 >
-                  <span>Open Code &amp; Spec Auditor</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>Open</span>
+                  <ArrowRight className="w-3 h-3" />
                 </Link>
               ) : (
-                <span className="text-xs text-slate-400 font-medium italic">
-                  Disabled &bull; Enable in Settings
-                </span>
+                <span className="text-[11px] text-zinc-400 font-mono italic shrink-0">Disabled</span>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Right Column: Live Event Audit Stream */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <Activity className="w-4 h-4 text-emerald-400" />
+              Live Agent Activity
+            </h2>
+            <span className="text-[10px] text-zinc-400 font-mono">Real-time Stream</span>
+          </div>
+
+          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3">
+            {recentEvents.map((ev) => (
+              <div
+                key={ev.id}
+                className="p-3 rounded-lg bg-zinc-950/60 border border-zinc-800/60 space-y-1.5"
+              >
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-zinc-200">{ev.action}</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">{ev.time}</span>
+                </div>
+                <p className="text-[11px] text-zinc-400 leading-snug">{ev.detail}</p>
+                <div className="flex items-center justify-between pt-1 text-[10px] font-mono">
+                  <span className="text-emerald-400">{ev.agent}</span>
+                  <span className="text-zinc-400">{ev.status}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

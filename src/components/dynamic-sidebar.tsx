@@ -13,11 +13,15 @@ import {
   Building2,
   ChevronDown,
   Sparkles,
+  Layers,
+  CircleDot,
+  CheckCircle,
+  ExternalLink,
 } from 'lucide-react';
 
 export function DynamicSidebar() {
   const pathname = usePathname();
-  const { activeTenant, tenants, setActiveTenantBySlug, t, isRtl } = useTenant();
+  const { activeTenant, tenants, setActiveTenantBySlug, t } = useTenant();
   const modules = activeTenant.settings.modules;
 
   const navItems = [
@@ -26,117 +30,227 @@ export function DynamicSidebar() {
       label: t('nav.dashboard'),
       icon: LayoutDashboard,
       visible: true,
+      group: 'Core',
     },
     {
       href: `/w/${activeTenant.slug}/documents`,
       label: t('nav.documents'),
       icon: FileText,
       visible: modules.docIntel,
-      badge: 'Agent Active',
+      badge: 'Active',
+      group: 'Capabilities',
     },
     {
       href: `/w/${activeTenant.slug}/support`,
       label: t('nav.support'),
       icon: MessageSquare,
       visible: modules.supportSwarm,
-      badge: 'Swarm Live',
+      badge: 'Live',
+      group: 'Capabilities',
     },
     {
       href: `/w/${activeTenant.slug}/code-audit`,
       label: t('nav.codeAudit'),
       icon: ShieldAlert,
       visible: modules.codeAudit,
-      badge: 'Specs v1',
+      badge: 'Auditing',
+      group: 'Capabilities',
     },
     {
       href: `/w/${activeTenant.slug}/settings`,
       label: t('nav.settings'),
       icon: Settings,
       visible: true,
+      group: 'Admin',
     },
   ];
 
+  const initials = activeTenant.name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
-    <aside className="w-72 bg-slate-900 border-r border-slate-800 text-slate-100 flex flex-col h-screen sticky top-0 select-none">
-      {/* Brand Header */}
-      <div className="p-5 border-b border-slate-800">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-lg transition-colors"
-            style={{ backgroundColor: activeTenant.settings.branding.primaryColor || '#0f766e' }}
-          >
-            <Sparkles className="w-5 h-5" />
+    <aside className="w-64 bg-[#0c0e14] border-r border-zinc-800/80 text-zinc-300 flex flex-col h-screen sticky top-0 select-none z-30">
+      {/* Workspace Selector Dropdown Header */}
+      <div className="p-3.5 border-b border-zinc-800/80">
+        <div className="relative group">
+          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-zinc-900/60 border border-zinc-800/70 hover:border-zinc-700 transition-all cursor-pointer">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs text-white shadow-sm shrink-0"
+              style={{ backgroundColor: activeTenant.settings.branding.primaryColor || '#0f766e' }}
+            >
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-xs text-zinc-100 truncate block">
+                  {activeTenant.name}
+                </span>
+                <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60">
+                  {activeTenant.tier}
+                </span>
+              </div>
+              <span className="text-[10px] text-zinc-400 font-mono block truncate">
+                /w/{activeTenant.slug}
+              </span>
+            </div>
+            <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
           </div>
-          <div className="overflow-hidden">
-            <h1 className="font-bold text-sm tracking-tight truncate text-slate-100">
-              {activeTenant.settings.branding.name || activeTenant.name}
-            </h1>
-            <p className="text-xs text-slate-400 truncate">
-              {activeTenant.settings.branding.tagline || 'Autonomous Micro-SaaS Engine'}
-            </p>
-          </div>
-        </div>
-      </div>
 
-      {/* Navigation Links */}
-      <div className="flex-1 py-4 px-3 overflow-y-auto space-y-1">
-        <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider uppercase text-slate-400">
-          Enabled Capabilities
-        </div>
-
-        {navItems
-          .filter((item) => item.visible)
-          .map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                    : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
-                }`}
-              >
-                <div className="flex items-center gap-3 truncate">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
-                  <span className="truncate">{item.label}</span>
-                </div>
-                {item.badge && (
-                  <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-      </div>
-
-      {/* Tenant Switcher at Bottom */}
-      <div className="p-4 border-t border-slate-800 bg-slate-950/60">
-        <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">
-          <Building2 className="w-3.5 h-3.5" />
-          {t('nav.switchTenant')}
-        </label>
-        <div className="relative">
+          {/* Hidden selector overlay */}
           <select
             value={activeTenant.slug}
             onChange={(e) => setActiveTenantBySlug(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer appearance-none pr-8"
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+            title="Switch Workspace"
           >
             {tenants.map((t) => (
-              <option key={t.id} value={t.slug}>
-                {t.name} ({t.settings.defaultLocale.toUpperCase()})
+              <option key={t.id} value={t.slug} className="bg-zinc-900 text-white">
+                {t.name} ({t.tier})
               </option>
             ))}
           </select>
-          <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
         </div>
-        <div className="mt-2 text-[10px] text-slate-400 flex justify-between items-center px-1">
-          <span>Tier: <strong className="text-slate-300">{activeTenant.tier}</strong></span>
-          <span className="font-mono text-slate-400">ID: {activeTenant.slug}</span>
+      </div>
+
+      {/* Navigation Sections */}
+      <div className="flex-1 py-4 px-3 overflow-y-auto space-y-5">
+        {/* Core */}
+        <div>
+          <div className="px-3 pb-1.5 text-[10px] font-semibold tracking-wider uppercase text-zinc-400">
+            Platform
+          </div>
+          <div className="space-y-0.5">
+            {navItems
+              .filter((item) => item.group === 'Core' && item.visible)
+              .map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      isActive
+                        ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
+                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-zinc-400'}`} />
+                      <span>{item.label}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+          </div>
         </div>
+
+        {/* Enabled Capabilities */}
+        <div>
+          <div className="flex items-center justify-between px-3 pb-1.5">
+            <span className="text-[10px] font-semibold tracking-wider uppercase text-zinc-400">
+              Agent Capabilities
+            </span>
+            <Link
+              href={`/w/${activeTenant.slug}/settings`}
+              className="text-[10px] text-zinc-400 hover:text-zinc-300 transition-colors"
+            >
+              Configure
+            </Link>
+          </div>
+
+          <div className="space-y-0.5">
+            {navItems.filter((i) => i.group === 'Capabilities' && i.visible).length === 0 ? (
+              <div className="p-3 rounded-lg border border-dashed border-zinc-800 text-center">
+                <p className="text-[11px] text-zinc-400">No capabilities enabled.</p>
+                <Link
+                  href={`/w/${activeTenant.slug}/settings`}
+                  className="text-[11px] text-emerald-400 hover:underline font-medium block mt-1"
+                >
+                  Enable in Settings &rarr;
+                </Link>
+              </div>
+            ) : (
+              navItems
+                .filter((item) => item.group === 'Capabilities' && item.visible)
+                .map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                        isActive
+                          ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
+                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-zinc-400'}`} />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      <span className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/70 text-emerald-400 border border-emerald-800/40">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        {item.badge}
+                      </span>
+                    </Link>
+                  );
+                })
+            )}
+          </div>
+        </div>
+
+        {/* Administration */}
+        <div>
+          <div className="px-3 pb-1.5 text-[10px] font-semibold tracking-wider uppercase text-zinc-400">
+            Governance
+          </div>
+          <div className="space-y-0.5">
+            {navItems
+              .filter((item) => item.group === 'Admin' && item.visible)
+              .map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      isActive
+                        ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
+                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-zinc-400'}`} />
+                      <span>{item.label}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Info */}
+      <div className="p-3 border-t border-zinc-800/80 bg-[#090b10] flex items-center justify-between text-[11px] text-zinc-400">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span>RLS Isolated</span>
+        </div>
+        <Link
+          href="/"
+          className="text-zinc-400 hover:text-zinc-300 flex items-center gap-1 transition-colors"
+          title="Return to Directory"
+        >
+          <span>All Workspaces</span>
+          <ExternalLink className="w-3 h-3" />
+        </Link>
       </div>
     </aside>
   );

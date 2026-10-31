@@ -1,4 +1,4 @@
-knowledge_units_count: 4
+knowledge_units_count: 5
 last_updated: "2026-10-31"
 domains:
   architecture:
@@ -14,6 +14,10 @@ domains:
     - id: DEV-001
       title: Internationalization (i18n) and Localized Prompting
       file: development/DEV-001-multilingual-i18n-standards.yaml
+      status: approved
+    - id: DEV-002
+      title: Enterprise-Grade UI/UX Design System
+      file: development/DEV-002-enterprise-design-system.yaml
       status: approved
   product:
     - id: PROD-001
