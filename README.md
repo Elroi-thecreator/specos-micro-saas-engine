@@ -3,6 +3,7 @@
 > **Kiroween 2026 Hackathon Submission** &bull; **Track:** *Skeleton Crew* &bull; **Eligible Bonus:** *Best Kiro Crew App*, *Best Startup Project*
 
 [![Built with Kiro](https://img.shields.io/badge/Built%20with-Kiro-emerald.svg)](https://kiro.dev)
+[![Vercel Deployed](https://img.shields.io/badge/Vercel-Production%20Live-black.svg?logo=vercel)](https://specos-micro-saas-engine.vercel.app/)
 [![Architecture Standards](https://img.shields.io/badge/Knowledge%20Base-ARCH--001%20%7C%20ARCH--002%20%7C%20ARCH--003-blue.svg)](./knowledge/)
 [![i18n Ready](https://img.shields.io/badge/i18n-7%20Locales%20%2B%20RTL-cyan.svg)](./src/lib/i18n/)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Elroi--thecreator%2Fspecos--micro--saas--engine-181717.svg?logo=github)](https://github.com/Elroi-thecreator/specos-micro-saas-engine)
@@ -12,9 +13,10 @@ SpecOS is an enterprise-grade, multi-tenant B2B AI Micro-SaaS boilerplate and au
 ---
 
 ## 🌐 Live Demo & Deployment
-* **Live Cloudflare Tunnel:** [https://witnesses-frozen-laser-reggae.trycloudflare.com](https://witnesses-frozen-laser-reggae.trycloudflare.com)
-* **Super Admin Control Plane:** [https://witnesses-frozen-laser-reggae.trycloudflare.com/super-admin](https://witnesses-frozen-laser-reggae.trycloudflare.com/super-admin)
-* **New Tenant Provisioning Wizard:** [https://witnesses-frozen-laser-reggae.trycloudflare.com/super-admin?tab=new](https://witnesses-frozen-laser-reggae.trycloudflare.com/super-admin?tab=new)
+* **Official Vercel Production:** [https://specos-micro-saas-engine.vercel.app](https://specos-micro-saas-engine.vercel.app)
+* **Super Admin Control Plane:** [https://specos-micro-saas-engine.vercel.app/super-admin](https://specos-micro-saas-engine.vercel.app/super-admin)
+* **New Tenant Provisioning Wizard:** [https://specos-micro-saas-engine.vercel.app/super-admin?tab=new](https://specos-micro-saas-engine.vercel.app/super-admin?tab=new)
+* **Live Cloudflare Tunnel Fallback:** [https://witnesses-frozen-laser-reggae.trycloudflare.com](https://witnesses-frozen-laser-reggae.trycloudflare.com)
 * **Public GitHub Repository:** [https://github.com/Elroi-thecreator/specos-micro-saas-engine](https://github.com/Elroi-thecreator/specos-micro-saas-engine)
 
 ---
