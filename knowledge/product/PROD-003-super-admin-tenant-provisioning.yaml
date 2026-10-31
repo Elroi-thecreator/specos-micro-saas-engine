@@ -1,0 +1,32 @@
+id: PROD-003
+type: product
+title: Super Admin Tenant Provisioning & Separated Admin Architecture
+domain: multi-tenant-administration
+status: approved
+version: "1.0.0"
+rule: |
+  The platform MUST provide a decoupled Super Admin control plane and distinct Tenant Admin pages:
+  1. Super Admin Portal (`/super-admin`): Global platform management to create, provision, configure, and inspect any tenant organization.
+  2. Section Configurability: Every tenant's workspace layout, widgets, and enabled sections MUST be independently configurable during onboarding and in settings.
+  3. Separated Admin Pages: Workspace administration MUST be separated into dedicated sub-pages (General, Modules, Section Customization, and Quotas) rather than a single congested view.
+  4. Header De-coupling: Direct navigation links to individual enabled applications MUST be presented separately in the header, rather than aggregated under a blanket preset link.
+do:
+  - Provide a dedicated `/super-admin` route with global tenant management, creation wizards, and cross-organization telemetry.
+  - Implement dynamic section toggling (`showOverviewKpis`, `showLiveAgentFeed`, `showRiskMatrix`, `showQuickActions`, `showTokenMeter`) stored on each tenant's settings.
+  - Expose individual application buttons in the workspace header for immediate access to active modules.
+  - Split tenant settings into structured administrative routes: `/w/[slug]/admin/general`, `/w/[slug]/admin/modules`, `/w/[slug]/admin/sections`, and `/w/[slug]/admin/billing`.
+  - Provide real-time live preview cards during tenant provisioning so administrators can see the exact layout before launch.
+dont:
+  - Never allow regular tenant members access to `/super-admin` or cross-tenant modification operations.
+  - Never force all tenants to share an identical dashboard layout without section customizability.
+  - Never bundle disparate administrative functions into an unorganized single-page form.
+reason: |
+  Enterprise customers demand both autonomous platform-level provisioning for operator agility
+  and tailored workspace layouts for end-users, ensuring that Legal, Support, and Security teams
+  only see the exact tools and widgets relevant to their domain.
+related_items:
+  - ARCH-001
+  - ARCH-002
+  - ARCH-003
+  - PROD-001
+  - DEV-002

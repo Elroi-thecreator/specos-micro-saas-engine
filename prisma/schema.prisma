@@ -1,0 +1,163 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum TenantTier {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model Tenant {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  name          String
+  defaultLocale String         @default("en")
+  tier          TenantTier     @default(STARTER)
+  status        TenantStatus   @default(ACTIVE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  settings      TenantSettings?
+  memberships   Membership[]
+  documents     TenantDocument[]
+  tickets       SupportTicket[]
+  audits        CodeAudit[]
+  jobs          AgentJob[]
+  ledgerEntries UsageLedger[]
+
+  @@index([slug])
+  @@index([status])
+}
+
+model TenantSettings {
+  id                 String   @id @default(cuid())
+  tenantId           String   @unique
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  enabledModules     String   @default("{\"docIntel\":true,\"supportSwarm\":false,\"codeAudit\":false}")
+  tokenBudgetMonthly Int      @default(100000)
+  tokensConsumed     Int      @default(0)
+  branding           String?  // JSON string
+  updatedAt          DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model User {
+  id              String       @id @default(cuid())
+  email           String       @unique
+  name            String
+  preferredLocale String       @default("en")
+  memberships     Membership[]
+  createdAt       DateTime     @default(now())
+
+  @@index([email])
+}
+
+model Membership {
+  id       String @id @default(cuid())
+  userId   String
+  tenantId String
+  role     String @default("MEMBER") // OWNER, ADMIN, MEMBER, VIEWER
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+  @@index([tenantId])
+}
+
+model TenantDocument {
+  id             String   @id @default(cuid())
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title          String
+  category       String   @default("General")
+  riskScore      String   @default("Low") // Low, Medium, High, Critical
+  summary        String
+  extractedData  String?  // JSON clauses
+  sourceLanguage String   @default("English")
+  createdAt      DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+}
+
+model SupportTicket {
+  id             String   @id @default(cuid())
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerName   String
+  customerEmail  String
+  subject        String
+  message        String
+  sentiment      String   @default("Neutral") // Positive, Neutral, Frustrated, Urgent
+  status         String   @default("Open")    // Open, In Review, Resolved
+  suggestedReply String?
+  inputLocale    String   @default("en")
+  createdAt      DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, status])
+}
+
+model CodeAudit {
+  id              String   @id @default(cuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  repo            String
+  branch          String   @default("main")
+  score           Int      @default(100)
+  violationsCount Int      @default(0)
+  findings        String?  // JSON array
+  specCompliance  String   @default("100% Compliant")
+  createdAt       DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+}
+
+model AgentJob {
+  id           String    @id @default(cuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  moduleKey    String    // docIntel, supportSwarm, codeAudit
+  status       JobStatus @default(PENDING)
+  inputPayload String?   // JSON
+  outputResult String?   // JSON
+  tokensUsed   Int       @default(0)
+  latencyMs    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  @@index([tenantId, createdAt])
+  @@index([status])
+}
+
+model UsageLedger {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  moduleKey     String
+  tokensDebited Int
+  balanceAfter  Int
+  actionType    String
+  timestamp     DateTime @default(now())
+
+  @@index([tenantId, timestamp])
+}

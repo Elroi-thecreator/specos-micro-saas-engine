@@ -16,12 +16,28 @@ export interface ModuleConfig {
   description: string;
 }
 
+export interface TenantSectionConfig {
+  showOverviewKpis: boolean;
+  showLiveAgentFeed: boolean;
+  showRiskMatrix: boolean;
+  showQuickActions: boolean;
+  showTokenMeter: boolean;
+}
+
+export interface TenantModuleCustomConfig {
+  docIntelSensitivity?: 'Standard' | 'Strict' | 'Lenient';
+  supportAutoReplyThreshold?: number; // e.g. 85
+  codeAuditStrictBranchProtection?: boolean;
+}
+
 export interface TenantSettings {
   modules: {
     docIntel: boolean;
     supportSwarm: boolean;
     codeAudit: boolean;
   };
+  sections?: TenantSectionConfig;
+  moduleConfig?: TenantModuleCustomConfig;
   defaultLocale: SupportedLocale;
   tokenBudgetMonthly: number;
   tokensConsumed: number;

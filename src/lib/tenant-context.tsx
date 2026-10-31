@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Tenant, SupportedLocale, ModuleKey, TenantSettings } from './types';
+import { Tenant, SupportedLocale, ModuleKey, TenantSettings, TenantSectionConfig } from './types';
 import { INITIAL_TENANTS } from './mock-data';
 import { TRANSLATIONS, SUPPORTED_LOCALES } from './i18n/translations';
 
@@ -13,8 +13,20 @@ interface TenantContextType {
   setActiveTenantBySlug: (slug: string) => void;
   setActiveLocale: (locale: SupportedLocale) => void;
   toggleModule: (moduleKey: ModuleKey, enabled: boolean) => void;
+  updateSections: (sections: Partial<TenantSectionConfig>) => void;
   applyPreset: (preset: 'legal' | 'support' | 'devsecops' | 'all') => void;
   updateSettings: (settings: Partial<TenantSettings>) => void;
+  createTenant: (tenantData: {
+    name: string;
+    slug?: string;
+    tier?: 'Starter' | 'Pro' | 'Enterprise';
+    settings?: Partial<TenantSettings>;
+  }) => Tenant;
+  deleteTenant: (slug: string) => boolean;
+  executeAgentJob: (
+    moduleKey: ModuleKey,
+    payload?: any
+  ) => Promise<{ success: boolean; jobId?: string; tokensRemaining?: number; error?: string }>;
   t: (key: string) => string;
 }
 
@@ -78,14 +90,23 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     setTenants((prev) =>
       prev.map((t) => {
         if (t.id === activeTenant.id) {
+          const updatedModules = {
+            ...t.settings.modules,
+            [moduleKey]: enabled,
+          };
+
+          // Scalable async API sync to backend
+          fetch(`/api/v1/w/${t.slug}/settings`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ modules: updatedModules }),
+          }).catch(() => {});
+
           return {
             ...t,
             settings: {
               ...t.settings,
-              modules: {
-                ...t.settings.modules,
-                [moduleKey]: enabled,
-              },
+              modules: updatedModules,
             },
           };
         }
@@ -107,7 +128,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
               modules.docIntel = true;
               defaultLocale = 'ja';
               branding = {
-                name: 'LexisAI Legal Intelligence',
+                name: 'LexisAI Legal Suite',
                 tagline: 'Autonomous Contract Risk & SLA Extraction',
                 primaryColor: '#0f766e',
               };
@@ -133,14 +154,21 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
             case 'all':
               modules = { docIntel: true, supportSwarm: true, codeAudit: true };
               branding = {
-                name: 'OmniCorp Enterprise Swarm',
-                tagline: 'Full Autonomous Operations Suite',
+                name: 'OmniCorp Global Holdings',
+                tagline: 'Full Autonomous Enterprise Swarm',
                 primaryColor: '#7c3aed',
               };
               break;
           }
 
           setActiveLocaleState(defaultLocale);
+
+          // Scalable async sync to backend API
+          fetch(`/api/v1/w/${t.slug}/settings`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ modules, defaultLocale, branding }),
+          }).catch(() => {});
 
           return {
             ...t,
@@ -161,11 +189,49 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     setTenants((prev) =>
       prev.map((t) => {
         if (t.id === activeTenant.id) {
+          const merged = { ...t.settings, ...newSettings };
+
+          // Scalable async sync to backend API
+          fetch(`/api/v1/w/${t.slug}/settings`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newSettings),
+          }).catch(() => {});
+
+          return {
+            ...t,
+            settings: merged,
+          };
+        }
+        return t;
+      })
+    );
+  };
+
+  const updateSections = (sections: Partial<TenantSectionConfig>) => {
+    setTenants((prev) =>
+      prev.map((t) => {
+        if (t.id === activeTenant.id) {
+          const currentSections: TenantSectionConfig = t.settings.sections || {
+            showOverviewKpis: true,
+            showLiveAgentFeed: true,
+            showRiskMatrix: true,
+            showQuickActions: true,
+            showTokenMeter: true,
+          };
+          const updated = { ...currentSections, ...sections };
+
+          fetch(`/api/v1/w/${t.slug}/settings`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sections: updated }),
+          }).catch(() => {});
+
           return {
             ...t,
             settings: {
               ...t.settings,
-              ...newSettings,
+              sections: updated,
             },
           };
         }
@@ -174,12 +240,130 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const createTenant = (tenantData: {
+    name: string;
+    slug?: string;
+    tier?: 'Starter' | 'Pro' | 'Enterprise';
+    settings?: Partial<TenantSettings>;
+  }): Tenant => {
+    const rawSlug = tenantData.slug || tenantData.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    let finalSlug = rawSlug.toLowerCase().trim().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    if (!finalSlug) {
+      finalSlug = `tenant-${Date.now().toString(36)}`;
+    }
+    if (tenants.some((t) => t.slug === finalSlug)) {
+      finalSlug = `${finalSlug}-${Math.random().toString(36).substring(2, 6)}`;
+    }
+
+    const newTenant: Tenant = {
+      id: `tenant-${Date.now().toString(36)}`,
+      name: tenantData.name,
+      slug: finalSlug,
+      tier: tenantData.tier || 'Pro',
+      settings: {
+        modules: {
+          docIntel: tenantData.settings?.modules?.docIntel ?? true,
+          supportSwarm: tenantData.settings?.modules?.supportSwarm ?? false,
+          codeAudit: tenantData.settings?.modules?.codeAudit ?? false,
+        },
+        sections: {
+          showOverviewKpis: tenantData.settings?.sections?.showOverviewKpis ?? true,
+          showLiveAgentFeed: tenantData.settings?.sections?.showLiveAgentFeed ?? true,
+          showRiskMatrix: tenantData.settings?.sections?.showRiskMatrix ?? true,
+          showQuickActions: tenantData.settings?.sections?.showQuickActions ?? true,
+          showTokenMeter: tenantData.settings?.sections?.showTokenMeter ?? true,
+        },
+        moduleConfig: {
+          docIntelSensitivity: tenantData.settings?.moduleConfig?.docIntelSensitivity || 'Standard',
+          supportAutoReplyThreshold: tenantData.settings?.moduleConfig?.supportAutoReplyThreshold || 85,
+          codeAuditStrictBranchProtection: tenantData.settings?.moduleConfig?.codeAuditStrictBranchProtection ?? true,
+        },
+        defaultLocale: tenantData.settings?.defaultLocale || 'en',
+        tokenBudgetMonthly: tenantData.settings?.tokenBudgetMonthly || 150000,
+        tokensConsumed: 0,
+        branding: {
+          name: tenantData.settings?.branding?.name || tenantData.name,
+          tagline: tenantData.settings?.branding?.tagline || 'Autonomous Intelligent Workspace',
+          primaryColor: tenantData.settings?.branding?.primaryColor || '#2563eb',
+        },
+      },
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+
+    setTenants((prev) => [...prev, newTenant]);
+    setActiveTenantId(newTenant.id);
+    setActiveLocaleState(newTenant.settings.defaultLocale);
+
+    fetch('/api/v1/tenants', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTenant),
+    }).catch(() => {});
+
+    return newTenant;
+  };
+
+  const deleteTenant = (slug: string): boolean => {
+    if (tenants.length <= 1) return false;
+    setTenants((prev) => prev.filter((t) => t.slug !== slug));
+    if (activeTenant.slug === slug) {
+      const remaining = tenants.filter((t) => t.slug !== slug);
+      if (remaining.length > 0) {
+        setActiveTenantId(remaining[0].id);
+        setActiveLocaleState(remaining[0].settings.defaultLocale);
+      }
+    }
+    return true;
+  };
+
+  const executeAgentJob = async (
+    moduleKey: ModuleKey,
+    payload: any = {}
+  ): Promise<{ success: boolean; jobId?: string; tokensRemaining?: number; error?: string }> => {
+    try {
+      const res = await fetch(`/api/v1/w/${activeTenant.slug}/agent/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ moduleKey, payload }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, error: data.error || 'Job dispatch failed' };
+      }
+
+      // Update local tenant token count with real backend response
+      if (data.tokensRemaining !== undefined) {
+        setTenants((prev) =>
+          prev.map((t) =>
+            t.id === activeTenant.id
+              ? {
+                  ...t,
+                  settings: {
+                    ...t.settings,
+                    tokensConsumed: t.settings.tokenBudgetMonthly - data.tokensRemaining,
+                  },
+                }
+              : t
+          )
+        );
+      }
+
+      return {
+        success: true,
+        jobId: data.jobId,
+        tokensRemaining: data.tokensRemaining,
+      };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
   const t = (key: string): string => {
     const localeDict = TRANSLATIONS[activeLocale];
     if (localeDict && localeDict[key]) {
       return localeDict[key];
     }
-    // Fallback to English
     const fallbackDict = TRANSLATIONS['en'];
     if (fallbackDict && fallbackDict[key]) {
       return fallbackDict[key];
@@ -197,8 +381,12 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
         setActiveTenantBySlug,
         setActiveLocale,
         toggleModule,
+        updateSections,
         applyPreset,
         updateSettings,
+        createTenant,
+        deleteTenant,
+        executeAgentJob,
         t,
       }}
     >

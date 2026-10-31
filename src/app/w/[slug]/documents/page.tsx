@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function DocumentIntelligencePage() {
-  const { activeTenant, toggleModule, t, activeLocale } = useTenant();
+  const { activeTenant, toggleModule, executeAgentJob, t, activeLocale } = useTenant();
   const isEnabled = activeTenant.settings.modules.docIntel;
 
   const [documents, setDocuments] = useState<DocumentItem[]>(() => {
@@ -29,6 +29,7 @@ export default function DocumentIntelligencePage() {
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem>(documents[0]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzedSuccess, setAnalyzedSuccess] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
 
   if (!isEnabled) {
     return (
@@ -50,13 +51,15 @@ export default function DocumentIntelligencePage() {
     );
   }
 
-  const handleRunAgent = () => {
+  const handleRunAgent = async () => {
     setIsAnalyzing(true);
-    setTimeout(() => {
-      setIsAnalyzing(false);
+    const res = await executeAgentJob('docIntel', { docId: selectedDoc.id });
+    setIsAnalyzing(false);
+    if (res.success) {
+      setJobId(res.jobId || null);
       setAnalyzedSuccess(true);
-      setTimeout(() => setAnalyzedSuccess(false), 3000);
-    }, 1400);
+      setTimeout(() => setAnalyzedSuccess(false), 4000);
+    }
   };
 
   return (
@@ -82,14 +85,21 @@ export default function DocumentIntelligencePage() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-all shadow-xs disabled:opacity-50"
         >
           <Sparkles className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} />
-          <span>{isAnalyzing ? 'Agent Analyzing...' : 'Run Autonomous Audit'}</span>
+          <span>{isAnalyzing ? 'Queuing Worker Job...' : 'Run Autonomous Audit'}</span>
         </button>
       </div>
 
       {analyzedSuccess && (
-        <div className="p-3 rounded-lg bg-teal-50 border border-teal-200 text-teal-800 text-xs flex items-center gap-2 font-medium">
-          <CheckCircle2 className="w-4 h-4 text-teal-600" />
-          <span>Contract risk audit complete &bull; Localized briefing generated in {activeLocale.toUpperCase()}!</span>
+        <div className="p-3.5 rounded-lg bg-teal-50 border border-teal-200 text-teal-900 text-xs flex items-center justify-between font-medium">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0" />
+            <span>Contract audit job completed via worker queue in {activeLocale.toUpperCase()}!</span>
+          </div>
+          {jobId && (
+            <span className="font-mono text-[10px] bg-white px-2 py-0.5 rounded border border-teal-200 text-teal-800">
+              ID: {jobId}
+            </span>
+          )}
         </div>
       )}
 

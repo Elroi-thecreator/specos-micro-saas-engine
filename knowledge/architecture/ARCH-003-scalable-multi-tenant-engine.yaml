@@ -1,0 +1,29 @@
+id: ARCH-003
+type: architecture
+title: High-Scale Multi-Tenant Data & Worker Architecture
+domain: scalability
+status: approved
+version: "1.0.0"
+rule: |
+  The application MUST maintain horizontal scalability across thousands of concurrent tenants:
+  1. Edge middleware MUST resolve tenant context and enforce rate limits before routing to handlers.
+  2. Database queries MUST enforce tenant partitioning with composite indices on (tenant_id, created_at).
+  3. Long-running AI agent tasks MUST execute asynchronously via worker job queues rather than blocking web request threads.
+  4. Token consumption MUST be tracked atomically via ledger transactions to prevent race-condition quota overruns.
+do:
+  - Enforce tenant verification and header injection (`x-tenant-id`) at the edge middleware layer.
+  - Structure API routes under `/api/v1/w/[slug]/...` with strict schema validation and error boundaries.
+  - Implement an atomic token ledger that validates balances before agent execution.
+  - Provide asynchronous agent task dispatch with verifiable job IDs and status polling endpoints.
+  - Design database schema with foreign keys, cascade rules, and composite indexes for high concurrency.
+dont:
+  - Never run unbounded LLM inference directly in synchronous HTTP requests without timeouts or job tracking.
+  - Never allow tenant queries to perform full table scans across multiple tenants.
+  - Never store tenant state exclusively in client-side memory.
+reason: |
+  Ensures the platform can scale from 1 tenant to 100,000+ tenants with enterprise reliability,
+  preventing noisy-neighbor resource starvation, token quota abuse, and database bottlenecks.
+related_items:
+  - ARCH-001
+  - ARCH-002
+  - PROD-001

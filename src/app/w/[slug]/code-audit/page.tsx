@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function CodeAuditPage() {
-  const { activeTenant, toggleModule, t, activeLocale } = useTenant();
+  const { activeTenant, toggleModule, t, activeLocale, executeAgentJob } = useTenant();
   const isEnabled = activeTenant.settings.modules.codeAudit;
 
   const [audits, setAudits] = useState<CodeAuditItem[]>(() => {
@@ -29,6 +29,7 @@ export default function CodeAuditPage() {
   const [selectedAudit, setSelectedAudit] = useState<CodeAuditItem>(audits[0]);
   const [isRunningAudit, setIsRunningAudit] = useState(false);
   const [auditSuccess, setAuditSuccess] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
 
   if (!isEnabled) {
     return (
@@ -50,13 +51,15 @@ export default function CodeAuditPage() {
     );
   }
 
-  const handleRunAudit = () => {
+  const handleRunAudit = async () => {
     setIsRunningAudit(true);
-    setTimeout(() => {
-      setIsRunningAudit(false);
+    const res = await executeAgentJob('codeAudit', { repo: selectedAudit.repo, branch: selectedAudit.branch });
+    setIsRunningAudit(false);
+    if (res.success) {
+      setJobId(res.jobId || null);
       setAuditSuccess(true);
-      setTimeout(() => setAuditSuccess(false), 3000);
-    }, 1400);
+      setTimeout(() => setAuditSuccess(false), 4000);
+    }
   };
 
   return (
@@ -87,9 +90,16 @@ export default function CodeAuditPage() {
       </div>
 
       {auditSuccess && (
-        <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-center gap-2 font-medium">
-          <CheckCircle2 className="w-4 h-4 text-blue-600" />
-          <span>Audit complete &bull; Verified against ARCH-001, ARCH-002, and DEV-001!</span>
+        <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-medium shadow-xs">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+            <span>Audit executed via Worker Queue &bull; Verified against ARCH-001, ARCH-002, DEV-001, ARCH-003!</span>
+          </div>
+          {jobId && (
+            <span className="font-mono text-[11px] text-blue-700 bg-blue-100/80 px-2.5 py-0.5 rounded-md border border-blue-200 shrink-0">
+              Job #{jobId.slice(0, 8)}
+            </span>
+          )}
         </div>
       )}
 

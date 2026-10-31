@@ -1,4 +1,4 @@
-knowledge_units_count: 6
+knowledge_units_count: 8
 last_updated: "2026-10-31"
 domains:
   architecture:
@@ -9,6 +9,10 @@ domains:
     - id: ARCH-002
       title: Modular Agent Capabilities & Configuration Engine
       file: architecture/ARCH-002-modular-agent-registry.yaml
+      status: approved
+    - id: ARCH-003
+      title: High-Scale Multi-Tenant Data & Worker Architecture
+      file: architecture/ARCH-003-scalable-multi-tenant-engine.yaml
       status: approved
   development:
     - id: DEV-001
@@ -27,4 +31,8 @@ domains:
     - id: PROD-002
       title: Clear Product Narrative & Interactive Onboarding UX
       file: product/PROD-002-product-narrative-onboarding.yaml
+      status: approved
+    - id: PROD-003
+      title: Super Admin Tenant Provisioning & Separated Admin Architecture
+      file: product/PROD-003-super-admin-tenant-provisioning.yaml
       status: approved

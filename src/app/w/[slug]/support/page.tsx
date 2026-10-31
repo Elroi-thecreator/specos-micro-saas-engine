@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function SupportSwarmPage() {
-  const { activeTenant, toggleModule, t, activeLocale } = useTenant();
+  const { activeTenant, toggleModule, executeAgentJob, t, activeLocale } = useTenant();
   const isEnabled = activeTenant.settings.modules.supportSwarm;
 
   const [tickets, setTickets] = useState<SupportTicketItem[]>(() => {
@@ -30,6 +30,7 @@ export default function SupportSwarmPage() {
   const [replyText, setReplyText] = useState(tickets[0]?.suggestedReply || '');
   const [isSending, setIsSending] = useState(false);
   const [sentSuccess, setSentSuccess] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
 
   if (!isEnabled) {
     return (
@@ -56,16 +57,21 @@ export default function SupportSwarmPage() {
     setReplyText(ticket.suggestedReply);
   };
 
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     setIsSending(true);
-    setTimeout(() => {
-      setIsSending(false);
+    const res = await executeAgentJob('supportSwarm', {
+      ticketId: selectedTicket.id,
+      reply: replyText,
+    });
+    setIsSending(false);
+    if (res.success) {
+      setJobId(res.jobId || null);
       setSentSuccess(true);
       setTickets((prev) =>
         prev.map((tk) => (tk.id === selectedTicket.id ? { ...tk, status: 'Resolved' } : tk))
       );
-      setTimeout(() => setSentSuccess(false), 3000);
-    }, 1100);
+      setTimeout(() => setSentSuccess(false), 4000);
+    }
   };
 
   return (
@@ -94,9 +100,16 @@ export default function SupportSwarmPage() {
       </div>
 
       {sentSuccess && (
-        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-medium">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          <span>Ticket marked RESOLVED &bull; Customer received localized reply!</span>
+        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center justify-between font-medium">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Ticket marked RESOLVED &bull; Localized reply delivered via worker queue!</span>
+          </div>
+          {jobId && (
+            <span className="font-mono text-[10px] bg-white px-2 py-0.5 rounded border border-emerald-200 text-emerald-800">
+              ID: {jobId}
+            </span>
+          )}
         </div>
       )}
 
@@ -206,7 +219,7 @@ export default function SupportSwarmPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs transition-colors shadow-xs disabled:opacity-50"
               >
                 <Send className="w-3 h-3" />
-                <span>{isSending ? 'Dispatching...' : 'Approve & Deliver Response'}</span>
+                <span>{isSending ? 'Dispatching to Queue...' : 'Approve & Deliver Response'}</span>
               </button>
             </div>
           </div>

@@ -8,6 +8,8 @@ import {
   Building2,
   Globe2,
   ShieldCheck,
+  Shield,
+  PlusCircle,
   ArrowRight,
   FileText,
   MessageSquare,
@@ -51,7 +53,21 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-xs">
+        <div className="flex items-center gap-3 text-xs">
+          <Link
+            href="/super-admin"
+            className="px-3.5 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 font-semibold transition-all shadow-xs flex items-center gap-1.5"
+          >
+            <Shield className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Super Admin</span>
+          </Link>
+          <Link
+            href="/super-admin?tab=new"
+            className="px-3.5 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold transition-colors shadow-xs hidden sm:flex items-center gap-1.5"
+          >
+            <PlusCircle className="w-3.5 h-3.5 text-slate-600" />
+            <span>Add Tenant</span>
+          </Link>
           <Link
             href="/w/lexis-legal"
             className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-xs"
@@ -313,16 +329,26 @@ export default function LandingPage() {
 
         {/* SECTION: CLIENT WORKSPACES EXPLAINED */}
         <div className="mt-20 text-left">
-          <div className="border-b border-slate-200 pb-4 mb-6">
-            <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-500 block">
-              Multi-Tenant Architecture in Practice
-            </span>
-            <h2 className="text-xl font-extrabold text-slate-950 mt-1">
-              Explore 4 Real Client Workspaces Running on SpecOS:
-            </h2>
-            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-              Every client organization gets their own private workspace with their preferred language, logo, and active agent modules. Click any workspace below to enter:
-            </p>
+          <div className="border-b border-slate-200 pb-4 mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-500 block">
+                Multi-Tenant Architecture in Practice
+              </span>
+              <h2 className="text-xl font-extrabold text-slate-950 mt-1">
+                Explore Real Client Workspaces Running on SpecOS:
+              </h2>
+              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                Every client organization gets their own private workspace with their preferred language, logo, and active agent modules. Click any workspace below to enter:
+              </p>
+            </div>
+
+            <Link
+              href="/super-admin?tab=new"
+              className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-xs shrink-0 flex items-center gap-1.5"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>Provision New Tenant</span>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
