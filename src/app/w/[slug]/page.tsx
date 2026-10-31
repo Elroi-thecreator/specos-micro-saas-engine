@@ -17,6 +17,8 @@ import {
   Activity,
   ArrowUpRight,
   TrendingUp,
+  Info,
+  HelpCircle,
 } from 'lucide-react';
 
 export default function WorkspaceDashboard() {
@@ -58,7 +60,21 @@ export default function WorkspaceDashboard() {
   ];
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-6 max-w-6xl">
+      {/* EXPLANATORY ONBOARDING CALLOUT */}
+      <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200 text-blue-950 flex items-start gap-3 shadow-xs">
+        <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+        <div className="text-xs leading-relaxed">
+          <p className="font-bold text-blue-950">
+            Welcome to the {activeTenant.name} Workspace!
+          </p>
+          <p className="text-blue-800 mt-0.5">
+            This workspace demonstrates an isolated organization running on <strong>SpecOS</strong> with default language <strong>{settings.defaultLocale.toUpperCase()}</strong>.
+            You can interact with active AI capabilities on the left, or open <Link href={`/w/${activeTenant.slug}/settings`} className="font-semibold underline text-blue-950 hover:text-blue-700">Workspace Settings</Link> to toggle more AI modules on/off in real-time.
+          </p>
+        </div>
+      </div>
+
       {/* Workspace Executive Header */}
       <div className="rounded-2xl border border-slate-200 bg-white p-7 relative overflow-hidden shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -66,7 +82,7 @@ export default function WorkspaceDashboard() {
             <div className="flex items-center gap-2 mb-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-semibold">
-                Active Tenant &bull; {activeTenant.slug}
+                Private Tenant Partition &bull; /w/{activeTenant.slug}
               </span>
               <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                 {activeTenant.tier} Plan
@@ -76,7 +92,7 @@ export default function WorkspaceDashboard() {
               {settings.branding.name || activeTenant.name}
             </h1>
             <p className="text-slate-600 text-xs sm:text-sm mt-1 max-w-xl">
-              {settings.branding.tagline || 'Autonomous Micro-SaaS Engine configured for your enterprise requirements.'}
+              {settings.branding.tagline || 'Autonomous Micro-SaaS Operations Suite configured for your enterprise requirements.'}
             </p>
           </div>
 
@@ -86,7 +102,7 @@ export default function WorkspaceDashboard() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-xs"
             >
               <Settings className="w-3.5 h-3.5" />
-              <span>Workspace Settings</span>
+              <span>Workspace Settings &amp; Modules</span>
             </Link>
           </div>
         </div>

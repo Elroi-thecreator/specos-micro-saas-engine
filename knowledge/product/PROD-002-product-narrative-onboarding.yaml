@@ -1,0 +1,28 @@
+id: PROD-002
+type: product
+title: Clear Product Narrative & Interactive Onboarding UX
+domain: product-experience
+status: approved
+version: "1.0.0"
+rule: |
+  The UI MUST immediately communicate what the product does within 5 seconds of landing:
+  SpecOS is an Autonomous AI Operations Suite where organizations deploy 3 specialized AI agents:
+  (1) Lexi: Legal Contract Risk Auditor,
+  (2) Sora: Customer Support & Ticket Swarm,
+  (3) Sentinel: Code Quality & Architecture Inspector.
+  Every page MUST provide human-readable 'How it works' visual steps, clear real-world examples,
+  and instant interactive demo buttons so users immediately grasp the value.
+do:
+  - Lead with concrete business problems solved rather than abstract developer jargon ('micro-saas boilerplate').
+  - Personify the 3 core agents (Legal Agent, Support Swarm, Code Auditor) with clear roles and outcomes.
+  - Include an interactive 'Live Product Simulator' or 'How It Works' walkthrough directly on the landing page.
+  - Provide sample documents, sample tickets, and sample code repos with 1-click 'Run AI' actions that show before/after results.
+dont:
+  - Never use impenetrable jargon like 'Abstract Monolith Skeleton' without explaining the direct end-user benefit.
+  - Never present empty or ambiguous dashboards without helpful empty states or guidance tooltips.
+reason: |
+  Users and hackathon evaluators must instantly understand what the software accomplishes,
+  how it benefits an organization, and how to use it without confusion.
+related_items:
+  - PROD-001
+  - DEV-002
