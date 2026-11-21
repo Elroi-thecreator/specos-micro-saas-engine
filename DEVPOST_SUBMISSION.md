@@ -38,6 +38,11 @@ https://specos-micro-saas-engine.vercel.app
 https://github.com/Elroi-thecreator/specos-micro-saas-engine
 ```
 
+### Open Source License
+```text
+MIT License (OSI-approved, visible in repository root LICENSE and package.json)
+```
+
 ---
 
 ## 🔐 Section 2: Technical & Eligibility Answers
@@ -47,7 +52,7 @@ https://github.com/Elroi-thecreator/specos-micro-saas-engine
 No authentication credentials, API keys, or sign-ups are required. The entire application is deployed live with zero barriers:
 
 1. Live Production URL: https://specos-micro-saas-engine.vercel.app
-2. Public GitHub Repository: https://github.com/Elroi-thecreator/specos-micro-saas-engine
+2. Public GitHub Repository: https://github.com/Elroi-thecreator/specos-micro-saas-engine (Open Source MIT License)
 
 Step-by-step testing path for judges:
 1. Interactive Simulator: On the homepage, scroll to "See How the AI Agents Actually Solve Problems" to test the Legal Contract Auditor and Support Swarm triage.

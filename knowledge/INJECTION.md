@@ -1,8 +1,8 @@
 # SpecOS Knowledge Base Injection (Unified Machine Context)
 
 > **Auto-Generated & Standardized Context Injection File**  
-> **Last Synchronized:** 2026-10-31  
-> **Active Knowledge Units Count:** 8  
+> **Last Synchronized:** 2026-11-21  
+> **Active Knowledge Units Count:** 9  
 > **Repository:** [https://github.com/Elroi-thecreator/specos-micro-saas-engine](https://github.com/Elroi-thecreator/specos-micro-saas-engine)  
 > **Live Production:** [https://specos-micro-saas-engine.vercel.app](https://specos-micro-saas-engine.vercel.app)
 
@@ -104,6 +104,21 @@ Any autonomous agent, language model, or developer modifying or extending this c
   * Never use dark-mode backgrounds (`#0a0a0a`, `#111827`) as the primary theme.
   * Never use low-contrast text that violates WCAG AA standards.
 * **Reason:** Enterprise B2B SaaS buyers expect clean, bright, professional light interfaces that maximize legibility and trust.
+
+---
+
+### Unit DEV-003: Open Source Licensing and Public Repository Compliance
+* **ID:** `DEV-003` &bull; **Status:** Approved &bull; **Version:** `1.0.0`
+* **Mandatory Rule:**
+  The repository **MUST** remain fully open source under the standard MIT License. A detectable `LICENSE` file **MUST** be maintained at the repository root, with matching SPDX identifier in `package.json` and clear badges/sections in `README.md` and Devpost submissions.
+* **Do:**
+  * Maintain an OSI-compliant MIT License file in the root directory.
+  * Define `"license": "MIT"` in `package.json`.
+  * Display license status and badges clearly in documentation and submission packages.
+* **Don't:**
+  * Never remove or obscure the open source license file.
+  * Never mark open-source packages as `private: true` without justification.
+* **Reason:** Compliance with open source hackathon submission criteria and open community contribution standards.
 
 ---
 

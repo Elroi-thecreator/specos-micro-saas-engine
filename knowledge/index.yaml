@@ -1,5 +1,5 @@
-knowledge_units_count: 8
-last_updated: "2026-10-31"
+knowledge_units_count: 9
+last_updated: "2026-11-21"
 domains:
   architecture:
     - id: ARCH-001
@@ -22,6 +22,10 @@ domains:
     - id: DEV-002
       title: Enterprise-Grade Light UI/UX Design System
       file: development/DEV-002-enterprise-design-system.yaml
+      status: approved
+    - id: DEV-003
+      title: Open Source Licensing and Public Repository Compliance
+      file: development/DEV-003-open-source-licensing.yaml
       status: approved
   product:
     - id: PROD-001

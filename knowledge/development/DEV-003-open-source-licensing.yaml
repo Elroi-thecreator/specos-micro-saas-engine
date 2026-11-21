@@ -1,0 +1,22 @@
+id: DEV-003
+type: development
+title: Open Source Licensing and Public Repository Compliance
+domain: governance
+status: approved
+version: "1.0.0"
+rule: |
+  The repository MUST remain fully open source under the standard MIT License.
+  A detectable LICENSE file MUST be maintained at the repository root, with matching
+  SPDX identifier in package.json and clear badges/sections in README.md and Devpost submissions.
+do:
+  - Maintain an OSI-compliant MIT License file in the root directory.
+  - Define "license": "MIT" in package.json.
+  - Display license status and badges clearly in documentation and submission packages.
+dont:
+  - Never remove or obscure the open source license file.
+  - Never mark open-source packages as private: true without justification.
+reason: |
+  Compliance with open source hackathon submission criteria and open community contribution standards.
+related_items:
+  - DEV-001
+  - DEV-002

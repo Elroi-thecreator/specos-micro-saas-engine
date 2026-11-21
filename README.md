@@ -7,6 +7,7 @@
 [![Architecture Standards](https://img.shields.io/badge/Knowledge%20Base-ARCH--001%20%7C%20ARCH--002%20%7C%20ARCH--003-blue.svg)](./knowledge/)
 [![i18n Ready](https://img.shields.io/badge/i18n-7%20Locales%20%2B%20RTL-cyan.svg)](./src/lib/i18n/)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Elroi--thecreator%2Fspecos--micro--saas--engine-181717.svg?logo=github)](https://github.com/Elroi-thecreator/specos-micro-saas-engine)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 SpecOS is an enterprise-grade, multi-tenant B2B AI Micro-SaaS boilerplate and autonomous agent execution engine. Built for the **Skeleton Crew** track, it proves that a **single, adaptable skeleton core** can dynamically morph into completely distinct vertical SaaS applications (e.g. Legal Contract AI in Japanese, Customer Support Swarm in Spanish, or DevSecOps Spec Auditor in English) purely through an interactive **Capabilities & Settings control center**.
 
@@ -131,3 +132,8 @@ All architectural rules, decisions, and development standards are recorded in th
 * **Separated Admin Pages:** Distinct interfaces for general identity, modules, sections, and quotas.
 * **Localization:** 7 languages + RTL Arabic handling.
 * **Kiro Integration:** Native spec-driven development (`.kiro/`), steering directives, and automated security hooks.
+
+---
+
+## 📄 License
+This project is open source and available under the [MIT License](./LICENSE).
