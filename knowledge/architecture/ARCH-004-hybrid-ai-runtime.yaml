@@ -1,0 +1,25 @@
+id: ARCH-004
+type: architecture
+title: Hybrid Live AI & Contextual Fallback Swarm Runtime
+domain: artificial-intelligence
+status: approved
+version: "1.0.0"
+rule: |
+  All autonomous capabilities MUST support hybrid runtime execution: real LLM inference via the
+  official Google Gen AI SDK (`@google/genai`) when an API key is configured, paired with seamless,
+  deterministic, and localized contextual mock fallback when running offline or without credentials.
+do:
+  - Initialize the Google Gen AI client with environment credentials (`GEMINI_API_KEY`).
+  - Pass the active tenant's operating locale and sensitivity settings directly into system prompts.
+  - Require strict JSON schema outputs for automated parsing across document, support, and audit modules.
+  - Provide high-fidelity, localized contextual fallback generators for zero-friction hackathon evaluation.
+dont:
+  - Never allow API failures or missing credentials to crash the user interface or return unhandled 500 errors.
+  - Never return hardcoded English mock text when the tenant is configured for Japanese, Spanish, or Arabic.
+reason: |
+  Ensures the platform delivers genuine production AI capabilities when configured while maintaining
+  guaranteed 100% uptime, zero friction, and high reliability for judges and local developers.
+related_items:
+  - ARCH-002
+  - DEV-001
+  - DEV-002

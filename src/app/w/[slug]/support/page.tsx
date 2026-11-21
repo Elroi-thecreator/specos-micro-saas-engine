@@ -31,6 +31,7 @@ export default function SupportSwarmPage() {
   const [isSending, setIsSending] = useState(false);
   const [sentSuccess, setSentSuccess] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [engineInfo, setEngineInfo] = useState<string | null>(null);
 
   if (!isEnabled) {
     return (
@@ -59,18 +60,45 @@ export default function SupportSwarmPage() {
 
   const handleSendReply = async () => {
     setIsSending(true);
+    setEngineInfo(null);
     const res = await executeAgentJob('supportSwarm', {
       ticketId: selectedTicket.id,
+      customerName: selectedTicket.customerName,
+      subject: selectedTicket.subject,
+      message: selectedTicket.message,
       reply: replyText,
     });
-    setIsSending(false);
-    if (res.success) {
-      setJobId(res.jobId || null);
-      setSentSuccess(true);
-      setTickets((prev) =>
-        prev.map((tk) => (tk.id === selectedTicket.id ? { ...tk, status: 'Resolved' } : tk))
-      );
-      setTimeout(() => setSentSuccess(false), 4000);
+
+    if (res.success && res.jobId) {
+      setJobId(res.jobId);
+      setTimeout(async () => {
+        try {
+          const pollRes = await fetch(`/api/v1/w/${activeTenant.slug}/agent/jobs/${res.jobId}`);
+          if (pollRes.ok) {
+            const pollData = await pollRes.json();
+            const jobData = pollData.data;
+            if (jobData?.resultPayload) {
+              setEngineInfo(jobData.modelUsed || 'Gemini AI');
+              const draft = jobData.resultPayload.draftReply;
+              if (draft) {
+                setReplyText(draft);
+                setSelectedTicket((prev) => ({ ...prev, suggestedReply: draft, status: 'Resolved' }));
+              }
+            }
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setIsSending(false);
+          setSentSuccess(true);
+          setTickets((prev) =>
+            prev.map((tk) => (tk.id === selectedTicket.id ? { ...tk, status: 'Resolved' } : tk))
+          );
+          setTimeout(() => setSentSuccess(false), 5000);
+        }
+      }, 500);
+    } else {
+      setIsSending(false);
     }
   };
 

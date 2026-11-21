@@ -71,8 +71,12 @@ export async function POST(
       tokenBudgetMonthly: tenant.settings.tokenBudgetMonthly,
     });
 
-    // 4. Enqueue background asynchronous worker job
-    const job = agentQueueService.enqueueJob(params.slug, moduleKey, body.payload || {});
+    // 4. Enqueue background asynchronous worker job with tenant context
+    const job = agentQueueService.enqueueJob(params.slug, moduleKey, body.payload || {}, {
+      tenantName: tenant.name,
+      locale: tenant.settings.defaultLocale,
+      sensitivity: tenant.settings.moduleConfig?.docIntelSensitivity,
+    });
 
     return NextResponse.json(
       {

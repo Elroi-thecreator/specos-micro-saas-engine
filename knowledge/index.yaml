@@ -1,4 +1,4 @@
-knowledge_units_count: 9
+knowledge_units_count: 11
 last_updated: "2026-11-21"
 domains:
   architecture:
@@ -14,6 +14,10 @@ domains:
       title: High-Scale Multi-Tenant Data & Worker Architecture
       file: architecture/ARCH-003-scalable-multi-tenant-engine.yaml
       status: approved
+    - id: ARCH-004
+      title: Hybrid Live AI & Contextual Fallback Swarm Runtime
+      file: architecture/ARCH-004-hybrid-ai-runtime.yaml
+      status: approved
   development:
     - id: DEV-001
       title: Internationalization (i18n) and Localized Prompting
@@ -26,6 +30,10 @@ domains:
     - id: DEV-003
       title: Open Source Licensing and Public Repository Compliance
       file: development/DEV-003-open-source-licensing.yaml
+      status: approved
+    - id: DEV-004
+      title: Automated Verification & Continuous Testing Suite
+      file: development/DEV-004-automated-testing-standards.yaml
       status: approved
   product:
     - id: PROD-001

@@ -30,6 +30,7 @@ export default function CodeAuditPage() {
   const [isRunningAudit, setIsRunningAudit] = useState(false);
   const [auditSuccess, setAuditSuccess] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [engineInfo, setEngineInfo] = useState<string | null>(null);
 
   if (!isEnabled) {
     return (
@@ -53,12 +54,48 @@ export default function CodeAuditPage() {
 
   const handleRunAudit = async () => {
     setIsRunningAudit(true);
-    const res = await executeAgentJob('codeAudit', { repo: selectedAudit.repo, branch: selectedAudit.branch });
-    setIsRunningAudit(false);
-    if (res.success) {
-      setJobId(res.jobId || null);
-      setAuditSuccess(true);
-      setTimeout(() => setAuditSuccess(false), 4000);
+    setEngineInfo(null);
+    const res = await executeAgentJob('codeAudit', {
+      repo: selectedAudit.repo,
+      branch: selectedAudit.branch,
+      findings: selectedAudit.findings,
+    });
+
+    if (res.success && res.jobId) {
+      setJobId(res.jobId);
+      setTimeout(async () => {
+        try {
+          const pollRes = await fetch(`/api/v1/w/${activeTenant.slug}/agent/jobs/${res.jobId}`);
+          if (pollRes.ok) {
+            const pollData = await pollRes.json();
+            const jobData = pollData.data;
+            if (jobData?.resultPayload) {
+              setEngineInfo(jobData.modelUsed || 'Gemini AI');
+              const resPayload = jobData.resultPayload;
+              const updatedAudit: CodeAuditItem = {
+                ...selectedAudit,
+                score: resPayload.score || selectedAudit.score,
+                violationsCount: resPayload.violations ?? selectedAudit.violationsCount,
+                findings: Array.isArray(resPayload.findings) && resPayload.findings.length > 0
+                  ? resPayload.findings
+                  : selectedAudit.findings,
+              };
+              setSelectedAudit(updatedAudit);
+              setAudits((prev) =>
+                prev.map((a) => (a.id === updatedAudit.id ? updatedAudit : a))
+              );
+            }
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setIsRunningAudit(false);
+          setAuditSuccess(true);
+          setTimeout(() => setAuditSuccess(false), 5000);
+        }
+      }, 500);
+    } else {
+      setIsRunningAudit(false);
     }
   };
 

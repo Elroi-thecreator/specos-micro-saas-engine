@@ -1,0 +1,25 @@
+id: DEV-004
+type: development
+title: Automated Verification & Continuous Testing Suite
+domain: testing-and-qa
+status: approved
+version: "1.0.0"
+rule: |
+  All critical multi-tenant isolation, sliding-window rate limiters, token debit transactions,
+  i18n translation coverage, and agent execution paths MUST be covered by automated unit and
+  integration tests in Vitest and validated via continuous integration (CI).
+do:
+  - Maintain comprehensive test suites covering `tokenLedgerService`, `tenantService`, `i18n`, and `geminiAgentService`.
+  - Enforce dictionary completeness across all 7 supported locales (`en`, `es`, `fr`, `de`, `ja`, `hi`, `ar`).
+  - Verify sliding-window rate limit enforcement (max 60 req/min) and negative balance rejection.
+  - Run `npm test` and `npm run build` in GitHub Actions CI workflows on every commit.
+dont:
+  - Never merge code that breaks test assertions or causes build failures.
+  - Never ship new user-facing features without corresponding unit or integration tests.
+reason: |
+  Automated testing guarantees enterprise resilience, prevents regressions during hackathon sprint
+  iterations, and ensures strict adherence to multi-tenant safety standards.
+related_items:
+  - ARCH-001
+  - ARCH-003
+  - DEV-001

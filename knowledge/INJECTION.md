@@ -2,7 +2,7 @@
 
 > **Auto-Generated & Standardized Context Injection File**  
 > **Last Synchronized:** 2026-11-21  
-> **Active Knowledge Units Count:** 9  
+> **Active Knowledge Units Count:** 11  
 > **Repository:** [https://github.com/Elroi-thecreator/specos-micro-saas-engine](https://github.com/Elroi-thecreator/specos-micro-saas-engine)  
 > **Live Production:** [https://specos-micro-saas-engine.vercel.app](https://specos-micro-saas-engine.vercel.app)
 
@@ -72,6 +72,22 @@ Any autonomous agent, language model, or developer modifying or extending this c
 
 ---
 
+### Unit ARCH-004: Hybrid Live AI & Contextual Fallback Swarm Runtime
+* **ID:** `ARCH-004` &bull; **Status:** Approved &bull; **Version:** `1.0.0`
+* **Mandatory Rule:**
+  All autonomous capabilities **MUST** support hybrid runtime execution: real LLM inference via the official Google Gen AI SDK (`@google/genai`) when `GEMINI_API_KEY` is present, paired with seamless, deterministic, and localized contextual mock fallback when running offline or without credentials.
+* **Do:**
+  * Initialize the Google Gen AI client with environment credentials (`GEMINI_API_KEY`).
+  * Pass the active tenant's operating locale and sensitivity settings directly into system prompts.
+  * Require strict JSON schema outputs for automated parsing across document, support, and audit modules.
+  * Provide high-fidelity, localized contextual fallback generators for zero-friction hackathon evaluation.
+* **Don't:**
+  * Never allow API failures or missing credentials to crash the user interface or return unhandled 500 errors.
+  * Never return hardcoded English mock text when the tenant is configured for Japanese, Spanish, or Arabic.
+* **Reason:** Ensures the platform delivers genuine production AI capabilities when configured while maintaining guaranteed 100% uptime, zero friction, and high reliability for judges and local developers.
+
+---
+
 ## 💻 Domain 2: Development & Design Standards
 
 ### Unit DEV-001: Internationalization (i18n) and Localized Prompting
@@ -119,6 +135,22 @@ Any autonomous agent, language model, or developer modifying or extending this c
   * Never remove or obscure the open source license file.
   * Never mark open-source packages as `private: true` without justification.
 * **Reason:** Compliance with open source hackathon submission criteria and open community contribution standards.
+
+---
+
+### Unit DEV-004: Automated Verification & Continuous Testing Suite
+* **ID:** `DEV-004` &bull; **Status:** Approved &bull; **Version:** `1.0.0`
+* **Mandatory Rule:**
+  All critical multi-tenant isolation, sliding-window rate limiters, token debit transactions, i18n translation coverage, and agent execution paths **MUST** be covered by automated unit and integration tests in Vitest and validated via continuous integration (CI).
+* **Do:**
+  * Maintain comprehensive test suites covering `tokenLedgerService`, `tenantService`, `i18n`, and `geminiAgentService`.
+  * Enforce dictionary completeness across all 7 supported locales (`en`, `es`, `fr`, `de`, `ja`, `hi`, `ar`).
+  * Verify sliding-window rate limit enforcement (max 60 req/min) and negative balance rejection.
+  * Run `npm test` and `npm run build` in GitHub Actions CI workflows on every commit.
+* **Don't:**
+  * Never merge code that breaks test assertions or causes build failures.
+  * Never ship new user-facing features without corresponding unit or integration tests.
+* **Reason:** Automated testing guarantees enterprise resilience, prevents regressions during hackathon sprint iterations, and ensures strict adherence to multi-tenant safety standards.
 
 ---
 
