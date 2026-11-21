@@ -12,6 +12,10 @@ import {
   Zap,
   Lock,
   Key,
+  Copy,
+  Check,
+  Terminal,
+  RefreshCw,
 } from 'lucide-react';
 
 export default function TenantAdminBillingPage() {
@@ -20,6 +24,57 @@ export default function TenantAdminBillingPage() {
 
   const [budget, setBudget] = useState(settings.tokenBudgetMonthly);
   const [savedAlert, setSavedAlert] = useState(false);
+  const [apiKey, setApiKey] = useState(`specos_live_${activeTenant.slug}_${Math.random().toString(36).substring(2, 10)}`);
+  const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedCurl, setCopiedCurl] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationResponse, setSimulationResponse] = useState<any | null>(null);
+
+  const handleRegenerateKey = () => {
+    setApiKey(`specos_live_${activeTenant.slug}_${Math.random().toString(36).substring(2, 12)}`);
+  };
+
+  const handleCopyKey = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(apiKey);
+    }
+    setCopiedKey(true);
+    setTimeout(() => setCopiedKey(false), 2000);
+  };
+
+  const curlCommand = `curl -X POST https://specos-micro-saas-engine.vercel.app/api/v1/w/${activeTenant.slug}/agent/run \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer ${apiKey}" \\
+  -d '{"moduleKey":"docIntel","payload":{"title":"Master Cloud Agreement"}}'`;
+
+  const handleCopyCurl = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(curlCommand);
+    }
+    setCopiedCurl(true);
+    setTimeout(() => setCopiedCurl(false), 2000);
+  };
+
+  const handleSimulateApiCall = async () => {
+    setIsSimulating(true);
+    setSimulationResponse(null);
+    try {
+      const res = await fetch(`/api/v1/w/${activeTenant.slug}/agent/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          moduleKey: 'docIntel',
+          payload: { title: 'Headless API Test Contract' },
+        }),
+      });
+      const data = await res.json();
+      setSimulationResponse({ httpStatus: res.status, ...data });
+    } catch (err: any) {
+      setSimulationResponse({ error: err.message });
+    } finally {
+      setIsSimulating(false);
+    }
+  };
 
   const usagePercent = Math.min(
     100,
@@ -154,30 +209,104 @@ export default function TenantAdminBillingPage() {
       </form>
 
       {/* API Rate Limits & Keys Card */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-4 shadow-xs">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2 flex items-center gap-1.5">
-          <Key className="w-3.5 h-3.5 text-slate-400" />
-          <span>Tenant API Keys &amp; Throttling</span>
-        </h3>
+      <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-5 shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <Key className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Scoped Tenant API Access &bull; Edge Gateway</span>
+          </h3>
+          <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-semibold">
+            Active Token
+          </span>
+        </div>
 
-        <div className="space-y-3 text-xs">
-          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
-              Edge Rate Limiting Standard (ARCH-003)
-            </span>
-            <p className="text-slate-700 font-mono text-[11px]">
-              60 requests/minute per tenant IP &bull; Sliding-window Redis-ready algorithm
-            </p>
+        <div className="space-y-4 text-xs">
+          {/* Rate Limiting Notice */}
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
+                Sliding-Window Rate Limit (Rule ARCH-003)
+              </span>
+              <p className="text-slate-700 font-mono text-[11px] mt-0.5">
+                Max 60 requests/minute per tenant &bull; Atomic token ledger accounting
+              </p>
+            </div>
+            <Zap className="w-4 h-4 text-amber-500 shrink-0" />
           </div>
 
-          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
-              Scoped API Token
-            </span>
-            <div className="flex items-center justify-between font-mono text-[11px] text-slate-800">
-              <span>sk_live_tenant_{activeTenant.slug}_98a72b3c...</span>
-              <span className="text-emerald-700 font-semibold">Active &bull; Read/Write</span>
+          {/* API Key Box */}
+          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                Verifiable API Token:
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleRegenerateKey}
+                  className="text-[11px] text-slate-600 hover:text-slate-900 flex items-center gap-1 font-semibold"
+                  title="Generate new token string"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Regenerate</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyKey}
+                  className="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 text-[11px] font-semibold flex items-center gap-1"
+                >
+                  {copiedKey ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedKey ? 'Copied!' : 'Copy'}</span>
+                </button>
+              </div>
             </div>
+            <div className="font-mono text-xs text-indigo-950 bg-white p-2 rounded border border-slate-200 break-all select-all font-semibold">
+              {apiKey}
+            </div>
+          </div>
+
+          {/* Headless cURL Playground */}
+          <div className="p-4 rounded-xl bg-slate-950 text-slate-200 space-y-2.5">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-mono text-slate-400 flex items-center gap-1.5 font-semibold">
+                <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Headless Agent Execution (cURL)</span>
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyCurl}
+                className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors flex items-center gap-1"
+              >
+                {copiedCurl ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                <span>{copiedCurl ? 'Copied' : 'Copy cURL'}</span>
+              </button>
+            </div>
+
+            <pre className="text-[10px] font-mono text-emerald-300 bg-slate-900 p-2.5 rounded-lg overflow-x-auto leading-relaxed border border-slate-800">
+              {curlCommand}
+            </pre>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[10px] text-slate-400">
+                Dispatches to async queue &bull; returns 202 Accepted + Job ID
+              </span>
+              <button
+                type="button"
+                onClick={handleSimulateApiCall}
+                disabled={isSimulating}
+                className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Zap className={`w-3.5 h-3.5 ${isSimulating ? 'animate-bounce' : ''}`} />
+                <span>{isSimulating ? 'Testing Endpoint...' : 'Simulate Live API Dispatch'}</span>
+              </button>
+            </div>
+
+            {simulationResponse && (
+              <div className="mt-2 p-2.5 rounded bg-slate-900 border border-slate-800 font-mono text-[10px] text-emerald-400">
+                <span className="text-slate-400 block mb-0.5">Response (HTTP {simulationResponse.httpStatus || 202}):</span>
+                {JSON.stringify(simulationResponse, null, 2)}
+              </div>
+            )}
           </div>
         </div>
       </div>

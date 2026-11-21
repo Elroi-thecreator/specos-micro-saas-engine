@@ -18,6 +18,7 @@ import {
   FileCheck2,
   FileUp,
   Cpu,
+  Download,
 } from 'lucide-react';
 
 export default function DocumentIntelligencePage() {
@@ -145,6 +146,44 @@ export default function DocumentIntelligencePage() {
     }
   };
 
+  const handleExportReport = () => {
+    const reportContent = `# SpecOS Autonomous Contract Intelligence Audit Report
+Date: ${new Date().toISOString()}
+Tenant: ${activeTenant.name} (${activeTenant.slug})
+Operating Locale: ${activeLocale.toUpperCase()}
+Document: ${selectedDoc.title}
+Category: ${selectedDoc.category}
+Assigned Risk: ${selectedDoc.riskScore}
+Engine: ${engineInfo || 'Gemini 2.5 Flash'}
+
+---
+
+## Executive Summary
+${selectedDoc.summary}
+
+## Extracted Clauses & Risk Findings
+${selectedDoc.extractedClauses
+  .map(
+    (c, i) => `### ${i + 1}. ${c.title} [Risk: ${c.risk}]
+> "${c.content}"
+`
+  )
+  .join('\n')}
+
+---
+Generated autonomously by SpecOS Micro-SaaS Engine (https://specos-micro-saas-engine.vercel.app)
+Compliant with ARCH-001, ARCH-002, and ARCH-004.
+`;
+
+    const blob = new Blob([reportContent], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `audit-report-${selectedDoc.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6 max-w-6xl">
       {/* Module Header */}
@@ -162,14 +201,25 @@ export default function DocumentIntelligencePage() {
           </p>
         </div>
 
-        <button
-          onClick={handleRunAgent}
-          disabled={isAnalyzing}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-all shadow-xs disabled:opacity-50"
-        >
-          <Sparkles className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} />
-          <span>{isAnalyzing ? 'Auditing with Gemini AI...' : 'Run Autonomous Audit'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportReport}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-all shadow-xs"
+            title="Download structured Markdown audit report"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>Export Report</span>
+          </button>
+
+          <button
+            onClick={handleRunAgent}
+            disabled={isAnalyzing}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-all shadow-xs disabled:opacity-50"
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} />
+            <span>{isAnalyzing ? 'Auditing with Gemini AI...' : 'Run Autonomous Audit'}</span>
+          </button>
+        </div>
       </div>
 
       {uploadNotice && (

@@ -23,12 +23,28 @@ import {
   Users,
   Check,
   ChevronRight,
+  Calculator,
+  TrendingUp,
+  Clock,
 } from 'lucide-react';
 
 export default function LandingPage() {
   const { tenants, setActiveTenantBySlug } = useTenant();
   const [activeDemoTab, setActiveDemoTab] = useState<'legal' | 'support' | 'code'>('legal');
   const [demoState, setDemoState] = useState<'idle' | 'running' | 'done'>('idle');
+
+  // Interactive Enterprise ROI Calculator State
+  const [contractsCount, setContractsCount] = useState(30);
+  const [ticketsCount, setTicketsCount] = useState(1200);
+  const [prCount, setPrCount] = useState(60);
+
+  const manualLaborCost = Math.round(
+    contractsCount * 1.5 * 150 + ticketsCount * 0.25 * 32 + prCount * 0.75 * 95
+  );
+  const specosCost = 249;
+  const netSavings = Math.max(0, manualLaborCost - specosCost);
+  const hoursSaved = Math.round(contractsCount * 1.5 + ticketsCount * 0.25 + prCount * 0.75);
+  const roiMultiplier = Math.round((manualLaborCost / specosCost) * 10) / 10;
 
   const handleRunDemo = () => {
     setDemoState('running');
@@ -324,6 +340,118 @@ export default function LandingPage() {
                 )}
               </div>
             )}
+          </div>
+        </div>
+
+        {/* SECTION: ENTERPRISE ROI & TOKEN ECONOMICS CALCULATOR */}
+        <div className="mt-16 text-left rounded-3xl border border-slate-200 bg-white p-8 shadow-xs">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+            <div>
+              <div className="flex items-center gap-2 text-xs text-indigo-700 font-mono mb-1 font-semibold">
+                <Calculator className="w-3.5 h-3.5" />
+                <span>Enterprise Economics &bull; Best Startup Model</span>
+              </div>
+              <h2 className="text-2xl font-black text-slate-950 tracking-tight">
+                Calculate Your Enterprise Savings with SpecOS
+              </h2>
+              <p className="text-xs text-slate-600 mt-1">
+                Estimate how much manual legal review, support staffing, and code compliance costs SpecOS eliminates monthly.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 font-mono text-xs bg-indigo-50 border border-indigo-200 text-indigo-900 px-3.5 py-1.5 rounded-xl font-bold shrink-0">
+              <TrendingUp className="w-4 h-4 text-indigo-600" />
+              <span>{roiMultiplier}x Cost Reduction</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+            {/* Sliders Left */}
+            <div className="lg:col-span-7 space-y-6">
+              <div>
+                <div className="flex justify-between items-center text-xs font-semibold text-slate-900 mb-2">
+                  <span>Legal Contracts Audited: <strong className="text-teal-700">{contractsCount} / month</strong></span>
+                  <span className="text-[11px] text-slate-500 font-normal">~$150/hr external counsel</span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="150"
+                  value={contractsCount}
+                  onChange={(e) => setContractsCount(Number(e.target.value))}
+                  className="w-full accent-teal-600 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center text-xs font-semibold text-slate-900 mb-2">
+                  <span>Customer Support Tickets: <strong className="text-amber-700">{ticketsCount.toLocaleString()} / month</strong></span>
+                  <span className="text-[11px] text-slate-500 font-normal">~$32/hr support rep</span>
+                </div>
+                <input
+                  type="range"
+                  min="200"
+                  max="5000"
+                  step="100"
+                  value={ticketsCount}
+                  onChange={(e) => setTicketsCount(Number(e.target.value))}
+                  className="w-full accent-amber-600 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center text-xs font-semibold text-slate-900 mb-2">
+                  <span>Pull Requests &amp; Specs Scanned: <strong className="text-blue-700">{prCount} / month</strong></span>
+                  <span className="text-[11px] text-slate-500 font-normal">~$95/hr senior engineer</span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="200"
+                  value={prCount}
+                  onChange={(e) => setPrCount(Number(e.target.value))}
+                  className="w-full accent-blue-600 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Results Card Right */}
+            <div className="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-6 flex flex-col justify-between shadow-md space-y-4">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold block mb-1">
+                  Estimated Net Monthly Value
+                </span>
+                <div className="text-3xl font-black text-emerald-400">
+                  ${netSavings.toLocaleString()}
+                  <span className="text-xs text-slate-400 font-normal ml-1">/ month saved</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 py-3 border-y border-slate-800 text-xs text-slate-300">
+                <div className="flex justify-between">
+                  <span>Traditional Manual Labor:</span>
+                  <span className="font-bold text-rose-400 line-through">${manualLaborCost.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>SpecOS Managed Token Tier:</span>
+                  <span className="font-bold text-emerald-300">${specosCost} / mo</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Engineering &amp; Legal Hours Reclaimed:</span>
+                  </span>
+                  <span className="font-bold text-cyan-300">{hoursSaved} hrs/mo</span>
+                </div>
+              </div>
+
+              <Link
+                href="/super-admin?tab=new"
+                className="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs text-center transition-all shadow-xs flex items-center justify-center gap-1.5"
+              >
+                <span>Deploy Organization &bull; Claim ROI</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
         </div>
 

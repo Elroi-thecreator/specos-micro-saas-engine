@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTenant } from '@/lib/tenant-context';
 import {
@@ -42,13 +42,39 @@ export default function WorkspaceDashboard() {
     Math.round((settings.tokensConsumed / settings.tokenBudgetMonthly) * 100)
   );
 
+  const [liveJobs, setLiveJobs] = useState<any[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchJobs = async () => {
+      try {
+        const res = await fetch(`/api/v1/w/${activeTenant.slug}/agent/jobs`);
+        if (res.ok) {
+          const json = await res.json();
+          if (isMounted && Array.isArray(json.data)) {
+            setLiveJobs(json.data);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch tenant jobs', err);
+      }
+    };
+
+    fetchJobs();
+    const interval = setInterval(fetchJobs, 4000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [activeTenant.slug]);
+
   const recentEvents = [
     {
       id: 'ev-1',
       action: 'Contract Risk Evaluation completed',
       detail: 'Master Cloud Agreement - VendorX.pdf audited in Japanese',
       time: '12m ago',
-      agent: 'Kiro Legal Agent',
+      agent: 'SpecOS Legal Agent (Gemini AI)',
       status: 'High Risk Flagged',
     },
     {
@@ -56,7 +82,7 @@ export default function WorkspaceDashboard() {
       action: 'Autonomous Support Reply dispatched',
       detail: 'Ticket #tkt-001 localized and sent in Spanish',
       time: '45m ago',
-      agent: 'Kiro Support Swarm',
+      agent: 'SpecOS Support Swarm',
       status: 'Delivered',
     },
     {
@@ -64,10 +90,50 @@ export default function WorkspaceDashboard() {
       action: 'Spec & Architecture Audit executed',
       detail: 'github.com/acme-org/payment-gateway (feat/multi-tenant-sync)',
       time: '2h ago',
-      agent: 'Kiro Sentinel',
-      status: 'Score 94/100',
+      agent: 'SpecOS Sentinel',
+      status: 'Score 98/100',
     },
   ];
+
+  const formattedLiveEvents = liveJobs
+    .slice()
+    .reverse()
+    .map((j) => {
+      const timeStr = j.completedAt
+        ? `${Math.max(1, Math.round((Date.now() - new Date(j.completedAt).getTime()) / 60000))}m ago`
+        : 'Just now';
+
+      let actionName = 'Autonomous Agent Job';
+      let agentName = j.modelUsed || 'SpecOS Agent';
+      if (j.moduleKey === 'docIntel') {
+        actionName = 'Contract Risk Intelligence Completed';
+        agentName = j.modelUsed || 'Gemini Legal Agent';
+      } else if (j.moduleKey === 'supportSwarm') {
+        actionName = 'Customer Support Swarm Triage';
+        agentName = j.modelUsed || 'Gemini Support Swarm';
+      } else if (j.moduleKey === 'codeAudit') {
+        actionName = 'Spec & Architecture Compliance Scan';
+        agentName = j.modelUsed || 'SpecOS Sentinel';
+      }
+
+      const detailText =
+        j.resultPayload?.summary ||
+        j.resultPayload?.status ||
+        (j.resultPayload?.sentiment
+          ? `Sentiment: ${j.resultPayload.sentiment} (${j.tokensUsed} tokens)`
+          : `Job ${j.id}`);
+
+      return {
+        id: j.id,
+        action: actionName,
+        detail: typeof detailText === 'string' ? detailText.slice(0, 110) : `Execution completed (${j.tokensUsed} tokens)`,
+        time: timeStr,
+        agent: agentName,
+        status: `${j.status} (${j.tokensUsed} tokens)`,
+      };
+    });
+
+  const displayEvents = [...formattedLiveEvents, ...recentEvents].slice(0, 6);
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -404,7 +470,7 @@ export default function WorkspaceDashboard() {
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3 shadow-xs">
-              {recentEvents.map((ev) => (
+              {displayEvents.map((ev) => (
                 <div
                   key={ev.id}
                   className="p-3 rounded-lg bg-slate-50 border border-slate-200/80 space-y-1.5"
