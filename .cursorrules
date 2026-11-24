@@ -1,0 +1,19 @@
+# Cursor IDE Agent Rules (.cursorrules)
+# Project: SpecOS - Autonomous Multi-Tenant & Multilingual Micro-SaaS Engine
+
+## Mandatory Knowledge Base Protocol (DEV-005 Sparse Retrieval)
+- Before designing, planning, or modifying code, always inspect `knowledge/index.yaml` first.
+- Read ONLY the specific relevant YAML unit needed for the task (e.g. `knowledge/architecture/ARCH-001-multi-tenant-isolation.yaml`).
+- Do NOT bulk-load `knowledge/INJECTION.md` into context for routine code edits.
+- Whenever changes are made, immediately update the relevant YAML in `knowledge/`, update `last_updated` in `knowledge/index.yaml`, and keep `knowledge/INJECTION.md` in sync.
+
+## Non-Negotiable Architecture Rules
+1. Multi-Tenant Isolation (ARCH-001): Every database query, API route, and state store MUST be explicitly scoped by `tenant_id` / `tenantSlug`.
+2. Asynchronous Worker Execution (ARCH-003): Never perform blocking LLM inference in web handlers. Dispatch to `agentQueueService` returning 202 Accepted with a verifiable `jobId`.
+3. Internationalization (DEV-001): Zero hardcoded strings. All copy must use `src/lib/i18n/translations.ts`. Arabic (ar) must support `dir="rtl"`.
+4. Enterprise Light Design System (DEV-002): Background `#f8fafc`, cards `#ffffff`, borders `#e2e8f0`. No primary dark mode.
+5. Kiro Native Ecosystem: Keep `.kiro/` synchronized with specs, steering files, and hooks. Never gitignore `.kiro`.
+
+## Verification Commands
+- Build: `npm run build`
+- Test: `npm test`

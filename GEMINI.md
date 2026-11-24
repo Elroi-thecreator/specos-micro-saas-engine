@@ -21,9 +21,9 @@ You are Google Gemini, operating as an expert principal systems architect and fu
 * **Mandatory Directive:** Whenever executing terminal commands, **always prepend** `Set-Location E:\Hackathon;`.
 
 ### 2. Mandatory Knowledge Base Protocol
-* **Step 1 (Pre-Change):** Always inspect `knowledge/index.yaml` and `knowledge/INJECTION.md` before planning or writing code.
+* **Step 1 (Pre-Change Sparse Retrieval):** Always inspect `knowledge/index.yaml` first (~450 tokens) to identify relevant architecture (`ARCH-*`), development (`DEV-*`), or product (`PROD-*`) standards. Read **ONLY** the specific YAML unit required for the task (e.g. `knowledge/architecture/ARCH-001-multi-tenant-isolation.yaml`, ~300 tokens). Do **NOT** bulk-load `knowledge/INJECTION.md` into the prompt context unless explicitly performing a cold bootstrap.
 * **Step 2 (Post-Change):** Immediately update relevant YAML files in `knowledge/`, increment `knowledge_units_count` in `knowledge/index.yaml`, update `last_updated`, and re-synchronize `knowledge/INJECTION.md`.
-* Never introduce architectural patterns or UX redesigns that contradict approved standards (`ARCH-001`, `ARCH-002`, `ARCH-003`, `DEV-001`, `DEV-002`, `PROD-001`, `PROD-002`, `PROD-003`).
+* Never introduce architectural patterns or UX redesigns that contradict approved standards (`ARCH-001`, `ARCH-002`, `ARCH-003`, `ARCH-004`, `DEV-001`, `DEV-002`, `DEV-003`, `DEV-004`, `DEV-005`, `PROD-001`, `PROD-002`, `PROD-003`).
 
 ### 3. Background Daemons & Long-Running Processes
 * Do **NOT** poll background tasks in a loop. Antigravity notifies you reactively when tasks finish or trigger notifications.

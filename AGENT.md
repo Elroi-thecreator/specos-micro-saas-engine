@@ -14,12 +14,12 @@ You are an autonomous AI software engineer pair programming on the **SpecOS** co
 
 ## 🚨 Non-Negotiable Operational Rules
 
-### 1. Mandatory Knowledge Base Protocol
+### 1. Mandatory Knowledge Base Protocol (Sparse Retrieval - DEV-005)
 Before designing, planning, or modifying any code or configuration:
-1. **Pre-Change Inspection:** Check `knowledge/index.yaml` and `knowledge/INJECTION.md`. Identify all relevant `ARCH-*`, `DEV-*`, and `PROD-*` standards that apply to the task.
+1. **Pre-Change Sparse Inspection:** Check `knowledge/index.yaml` (~450 tokens) to discover relevant `ARCH-*`, `DEV-*`, and `PROD-*` standards. Load **ONLY** the specific YAML file needed for the task (e.g. `knowledge/architecture/ARCH-001-multi-tenant-isolation.yaml`). Do **NOT** bulk-inject `knowledge/INJECTION.md` into active agent prompt context during routine modifications.
 2. **Post-Change Synchronization:** Whenever changes are made (e.g. new routes, schema modifications, UI behaviors, packaging updates, bug fixes, or architecture adjustments), immediately update the relevant knowledge units in `knowledge/`.
 3. If a new architectural pattern, product rule, or decision is introduced, create a new knowledge document following the standard schema (`id`, `type`, `title`, `domain`, `status`, `version`, `rule`, `do`, `dont`, `reason`, `related_items`).
-4. Update `knowledge/index.yaml` (increment `knowledge_units_count`, update `last_updated`, and add the new entry under the appropriate domain).
+4. Update `knowledge/index.yaml` (increment `knowledge_units_count`, update `last_updated`, and add the new entry under the appropriate domain), and re-sync `knowledge/INJECTION.md`.
 
 ### 2. Kiro Ecosystem Integrity (`.kiro/`)
 * Directory `/.kiro` **MUST NEVER** be added to `.gitignore`.

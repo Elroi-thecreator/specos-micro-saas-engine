@@ -1,8 +1,8 @@
 # SpecOS Knowledge Base Injection (Unified Machine Context)
 
 > **Auto-Generated & Standardized Context Injection File**  
-> **Last Synchronized:** 2026-11-21  
-> **Active Knowledge Units Count:** 11  
+> **Last Synchronized:** 2026-11-24  
+> **Active Knowledge Units Count:** 12  
 > **Repository:** [https://github.com/Elroi-thecreator/specos-micro-saas-engine](https://github.com/Elroi-thecreator/specos-micro-saas-engine)  
 > **Live Production:** [https://specos-micro-saas-engine.vercel.app](https://specos-micro-saas-engine.vercel.app)
 
@@ -154,6 +154,25 @@ Any autonomous agent, language model, or developer modifying or extending this c
 
 ---
 
+### Unit DEV-005: Token-Efficient Sparse Knowledge Protocol
+* **ID:** `DEV-005` &bull; **Status:** Approved &bull; **Version:** `1.0.0`
+* **Mandatory Rule:**
+  AI agents and automated tools operating on this repository **MUST** use Sparse Knowledge Retrieval:
+  1. Inspect `knowledge/index.yaml` first (~450 tokens) to identify the specific unit required for the task.
+  2. Load **ONLY** the targeted YAML unit file (~300 tokens) relevant to the change (e.g., `ARCH-001` for tenancy, `DEV-001` for i18n).
+  3. **NEVER** bulk-load `knowledge/INJECTION.md` (~3,800 tokens) into active agent prompt context unless explicitly performing a full repository bootstrap or requested by the user.
+  4. Post-change synchronization updates the specific YAML unit, increments `knowledge_units_count` or updates `last_updated` in `knowledge/index.yaml`, and keeps `knowledge/INJECTION.md` synchronized as an offline reference artifact.
+* **Do:**
+  * Read `knowledge/index.yaml` first to identify applicable architecture, development, or product standards.
+  * Read only the specific YAML file(s) needed for the active task.
+  * Keep `knowledge/INJECTION.md` up-to-date as a compiled, offline artifact for external audits, documentation, and zero-context bootstrapping.
+* **Don't:**
+  * Never dump the entire 3,800+ tokens of `knowledge/INJECTION.md` into prompt context for routine edits or queries.
+  * Never bypass checking `knowledge/index.yaml` before making architectural decisions or modifying core schemas.
+* **Reason:** Bulk-injecting all knowledge units wastes ~3,500+ tokens on every agent turn, exhausting context budgets and increasing latency. Sparse retrieval maintains 100% architectural rigor while reducing context token consumption by over 85%.
+
+---
+
 ## 📦 Domain 3: Product & Governance Standards
 
 ### Unit PROD-001: Turnkey Settings Page & Feature Toggle Control
@@ -208,8 +227,9 @@ Any autonomous agent, language model, or developer modifying or extending this c
 
 ## 🛠️ Mandatory Pre-Change & Post-Change Protocol
 
-1. **Pre-Change Knowledge Inspection (Mandatory Step 1):**
-   * Before designing or modifying any code, check `knowledge/index.yaml` and reference all relevant `ARCH-*`, `DEV-*`, and `PROD-*` standards.
+1. **Pre-Change Sparse Knowledge Inspection (Mandatory Step 1):**
+   * Before designing or modifying any code, inspect `knowledge/index.yaml` (~450 tokens) and read **only** the specific `ARCH-*`, `DEV-*`, or `PROD-*` YAML file needed for the task.
+   * Do **NOT** bulk-load `INJECTION.md` into the agent's prompt context during routine modifications.
 2. **Post-Change Knowledge Synchronization (Mandatory Step 2):**
    * Whenever changes are made (routes, schema, UI, or architecture), immediately update the relevant knowledge units in `knowledge/`.
-   * If a new standard is introduced, author its YAML unit, increment `knowledge_units_count`, update `last_updated`, and re-compile `INJECTION.md`.
+   * If a new standard is introduced, author its YAML unit, increment `knowledge_units_count`, update `last_updated` in `knowledge/index.yaml`, and re-compile `INJECTION.md`.

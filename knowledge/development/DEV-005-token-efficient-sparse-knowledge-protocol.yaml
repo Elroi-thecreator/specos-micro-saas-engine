@@ -1,0 +1,29 @@
+id: DEV-005
+type: development
+title: Token-Efficient Sparse Knowledge Protocol
+domain: context-and-agent-governance
+status: approved
+version: "1.0.0"
+rule: |
+  AI agents and automated tools operating on this repository MUST use Sparse Knowledge Retrieval:
+  1. Inspect `knowledge/index.yaml` first (~450 tokens) to identify the specific unit required for the task.
+  2. Load ONLY the targeted YAML unit file (~300 tokens) relevant to the change (e.g., ARCH-001 for tenancy, DEV-001 for i18n).
+  3. NEVER bulk-load `knowledge/INJECTION.md` (~3,800 tokens) into active agent prompt context unless explicitly performing a full repository bootstrap or explicitly requested by the user.
+  4. Post-change synchronization updates the specific YAML unit, increments `knowledge_units_count` or updates `last_updated` in `knowledge/index.yaml`, and keeps `knowledge/INJECTION.md` synchronized as an offline reference artifact.
+do:
+  - Read `knowledge/index.yaml` first to identify applicable architecture, development, or product standards.
+  - Read only the specific YAML file(s) needed for the active task.
+  - Keep `knowledge/INJECTION.md` up-to-date as a compiled, offline artifact for external audits, documentation, and zero-context bootstrapping.
+dont:
+  - Never dump the entire 3,800+ tokens of `knowledge/INJECTION.md` into prompt context for routine edits or queries.
+  - Never bypass checking `knowledge/index.yaml` before making architectural decisions or modifying core schemas.
+reason: |
+  Bulk-injecting all knowledge units wastes ~3,500+ tokens on every agent turn, exhausting context budgets
+  and increasing latency. Sparse retrieval maintains 100% architectural rigor while reducing context token
+  consumption by over 85%.
+related_items:
+  - ARCH-001
+  - ARCH-002
+  - ARCH-003
+  - DEV-001
+  - DEV-004
