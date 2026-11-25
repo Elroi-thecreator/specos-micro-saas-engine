@@ -7,7 +7,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { slug: string; jobId: string } }
 ) {
-  const job = agentQueueService.getJob(params.jobId);
+  const job = await agentQueueService.getJob(params.jobId);
 
   if (!job || job.tenantSlug !== params.slug) {
     return NextResponse.json(

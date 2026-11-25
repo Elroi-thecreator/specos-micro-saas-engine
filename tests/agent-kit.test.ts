@@ -47,51 +47,68 @@ describe('specos-agent-kit package', () => {
     ).rejects.toThrow("No agent task handler registered for taskKey 'missingTask'");
   });
 
-  it('supports custom JobStore in AgentQueueService', async () => {
+  it('supports async JobStore in AgentQueueService with bounded concurrency and retries', async () => {
     const backing = new Map<string, AgentJob>();
-    const customStore: JobStore = {
-      get: (id) => backing.get(id) || null,
-      set: (id, job) => backing.set(id, job),
-      listByTenant: (slug) => Array.from(backing.values()).filter((j) => j.tenantSlug === slug),
+    const asyncStore: JobStore = {
+      get: async (id) => backing.get(id) || null,
+      set: async (id, job) => {
+        backing.set(id, { ...job });
+      },
+      listByTenant: async (slug) =>
+        Array.from(backing.values()).filter((j) => j.tenantSlug === slug),
     };
 
     const runtime = new HybridAgentRuntime({ apiKey: '' });
-    runtime.registerTask('ping', {
-      buildPrompt: () => ({ systemInstruction: 'Return JSON', prompt: 'ping' }),
-      fallback: () => ({ result: { pong: true }, tokens: 10 }),
+    let callCount = 0;
+    runtime.registerTask('flaky', {
+      buildPrompt: () => ({ systemInstruction: 'Return JSON', prompt: 'flaky' }),
+      fallback: () => {
+        callCount += 1;
+        if (callCount === 1) {
+          throw new Error('Transient error');
+        }
+        return { result: { ok: true, attempt: callCount }, tokens: 10 };
+      },
     });
 
     const queue = new AgentQueueService({
       runtime,
-      store: customStore,
+      store: asyncStore,
       dispatchDelayMs: 10,
+      concurrency: 2,
+      maxRetries: 2,
+      retryBaseDelayMs: 15,
     });
 
-    const job = queue.enqueueJob('tenant-a', 'ping', { hello: 'world' });
+    const job = await queue.enqueueJob('tenant-a', 'flaky', { hello: 'world' });
     expect(job.status).toBe('QUEUED');
 
-    await new Promise((r) => setTimeout(r, 60));
+    await new Promise((r) => setTimeout(r, 120));
 
-    const completed = queue.getJob(job.id);
+    const completed = await queue.getJob(job.id);
     expect(completed?.status).toBe('COMPLETED');
-    expect(completed?.resultPayload).toEqual({ pong: true });
-    expect(queue.listJobsForTenant('tenant-a')).toHaveLength(1);
+    expect(completed?.attempts).toBe(2);
+    expect(completed?.resultPayload).toEqual({ ok: true, attempt: 2 });
+    expect(await queue.listJobsForTenant('tenant-a')).toHaveLength(1);
   });
 
-  it('enforces per-tenant rate limits and token quotas via TokenLedgerService', () => {
-    const ledger = new TokenLedgerService();
+  it('enforces true sliding-window rate limiting and bounded token ledger', () => {
+    const ledger = new TokenLedgerService({ windowMs: 1000, maxLedgerEntries: 2 });
 
-    expect(ledger.checkRateLimit('t1', 2)).toEqual({ allowed: true, remaining: 1 });
-    expect(ledger.checkRateLimit('t1', 2)).toEqual({ allowed: true, remaining: 0 });
-    expect(ledger.checkRateLimit('t1', 2)).toEqual({ allowed: false, remaining: 0 });
+    // 2 requests at t=100 and t=600 -> limit 2 reached
+    expect(ledger.checkRateLimit('t1', 2, 100).allowed).toBe(true);
+    expect(ledger.checkRateLimit('t1', 2, 600).allowed).toBe(true);
+    expect(ledger.checkRateLimit('t1', 2, 900).allowed).toBe(false);
 
-    const ok = ledger.debitTokens('t1', 'ping', 100, 400, 1000);
-    expect(ok.success).toBe(true);
-    expect(ok.newConsumed).toBe(500);
-    expect(ledger.getLedgerForTenant('t1')).toHaveLength(1);
+    // At t=1150, t=100 has slid out of the 1000ms window while t=600 remains
+    const slid = ledger.checkRateLimit('t1', 2, 1150);
+    expect(slid.allowed).toBe(true);
+    expect(slid.remaining).toBe(0);
 
-    const fail = ledger.debitTokens('t1', 'ping', 600, 500, 1000);
-    expect(fail.success).toBe(false);
-    expect(fail.remaining).toBe(500);
+    // Bounded ledger evicts oldest when maxLedgerEntries=2
+    ledger.debitTokens('t1', 'ping', 100, 0, 1000);
+    ledger.debitTokens('t1', 'ping', 100, 100, 1000);
+    ledger.debitTokens('t1', 'ping', 100, 200, 1000);
+    expect(ledger.getLedgerForTenant('t1')).toHaveLength(2);
   });
 });

@@ -57,7 +57,7 @@ describe('Gemini Agent Service & Worker Queue (ARCH-002, ARCH-003, DEV-001)', ()
   });
 
   it('enqueues and processes asynchronous agent jobs via worker queue', async () => {
-    const job = agentQueueService.enqueueJob('lexis-legal', 'docIntel', { title: 'Test SLA' }, {
+    const job = await agentQueueService.enqueueJob('lexis-legal', 'docIntel', { title: 'Test SLA' }, {
       tenantName: 'LexisAI',
       locale: 'en',
     });
@@ -68,7 +68,7 @@ describe('Gemini Agent Service & Worker Queue (ARCH-002, ARCH-003, DEV-001)', ()
     // Wait for worker processing
     await new Promise((resolve) => setTimeout(resolve, 150));
 
-    const finishedJob = agentQueueService.getJob(job.id);
+    const finishedJob = await agentQueueService.getJob(job.id);
     expect(finishedJob?.status).toBe('COMPLETED');
     expect(finishedJob?.resultPayload).toBeDefined();
     expect(finishedJob?.tokensUsed).toBeGreaterThan(0);

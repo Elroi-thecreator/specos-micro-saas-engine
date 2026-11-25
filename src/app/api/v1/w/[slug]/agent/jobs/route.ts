@@ -7,7 +7,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { slug: string } }
 ) {
-  const jobs = agentQueueService.listJobsForTenant(params.slug);
+  const jobs = await agentQueueService.listJobsForTenant(params.slug);
   return NextResponse.json({
     success: true,
     data: jobs,

@@ -5,6 +5,7 @@ export { AgentQueueService, InMemoryJobStore } from './agent-queue';
 export type { AgentQueueServiceOptions, EnqueueJobMetadata } from './agent-queue';
 
 export { TokenLedgerService } from './token-ledger';
+export type { TokenLedgerServiceOptions } from './token-ledger';
 
 export type {
   AgentExecutionOptions,
@@ -18,5 +19,6 @@ export type {
   JobStatus,
   JobStore,
   LedgerEntry,
+  MaybePromise,
   RateLimitResult,
 } from './types';

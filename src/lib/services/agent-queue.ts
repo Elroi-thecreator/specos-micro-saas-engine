@@ -25,9 +25,11 @@ function toSpecOSJob(job: KitAgentJob): AgentJob {
 class SpecOSAgentQueueService {
   private readonly queue = new KitAgentQueueService({
     runtime: geminiAgentRuntime,
+    concurrency: 5,
+    maxRetries: 2,
   });
 
-  public enqueueJob(
+  public async enqueueJob(
     tenantSlug: string,
     moduleKey: ModuleKey,
     inputPayload: any,
@@ -36,8 +38,8 @@ class SpecOSAgentQueueService {
       locale?: SupportedLocale;
       sensitivity?: string;
     }
-  ): AgentJob {
-    const job = this.queue.enqueueJob(tenantSlug, moduleKey, inputPayload, {
+  ): Promise<AgentJob> {
+    const job = await this.queue.enqueueJob(tenantSlug, moduleKey, inputPayload, {
       tenantName: metadata?.tenantName,
       locale: metadata?.locale,
       metadata: metadata?.sensitivity ? { sensitivity: metadata.sensitivity } : undefined,
@@ -45,13 +47,14 @@ class SpecOSAgentQueueService {
     return toSpecOSJob(job);
   }
 
-  public getJob(jobId: string): AgentJob | null {
-    const job = this.queue.getJob(jobId);
+  public async getJob(jobId: string): Promise<AgentJob | null> {
+    const job = await this.queue.getJob(jobId);
     return job ? toSpecOSJob(job) : null;
   }
 
-  public listJobsForTenant(tenantSlug: string): AgentJob[] {
-    return this.queue.listJobsForTenant(tenantSlug).map(toSpecOSJob);
+  public async listJobsForTenant(tenantSlug: string): Promise<AgentJob[]> {
+    const jobs = await this.queue.listJobsForTenant(tenantSlug);
+    return jobs.map(toSpecOSJob);
   }
 }
 

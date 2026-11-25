@@ -72,7 +72,7 @@ export async function POST(
     });
 
     // 4. Enqueue background asynchronous worker job with tenant context
-    const job = agentQueueService.enqueueJob(params.slug, moduleKey, body.payload || {}, {
+    const job = await agentQueueService.enqueueJob(params.slug, moduleKey, body.payload || {}, {
       tenantName: tenant.name,
       locale: tenant.settings.defaultLocale,
       sensitivity: tenant.settings.moduleConfig?.docIntelSensitivity,

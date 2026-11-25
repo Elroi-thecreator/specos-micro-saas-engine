@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
+import type { GoogleGenAI } from '@google/genai';
 import {
   AgentExecutionOptions,
   AgentExecutionResult,
@@ -14,11 +14,13 @@ export interface HybridAgentRuntimeOptions {
 
 /**
  * Multi-tenant AI agent runtime supporting live Gemini execution via `@google/genai`
- * with automatic deterministic fallback when offline or unauthenticated.
+ * (lazily loaded only when an API key is configured) with automatic deterministic
+ * fallback when offline, unauthenticated, or when `@google/genai` is not installed.
  */
 export class HybridAgentRuntime {
   private client: GoogleGenAI | null = null;
-  private hasApiKey = false;
+  private clientInitAttempted = false;
+  private readonly apiKey: string | undefined;
   private readonly defaultModel: string;
   private readonly fallbackModelLabel: string;
   private readonly handlers = new Map<string, AgentTaskHandler<any, any>>();
@@ -26,22 +28,34 @@ export class HybridAgentRuntime {
   constructor(options: HybridAgentRuntimeOptions = {}) {
     this.defaultModel = options.defaultModel || 'gemini-2.5-flash';
     this.fallbackModelLabel = options.fallbackModelLabel || 'specos-intelligent-engine (mock fallback)';
-
-    const apiKey =
+    this.apiKey =
       options.apiKey ??
       (typeof process !== 'undefined'
         ? process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY
         : undefined);
+  }
 
-    if (apiKey) {
-      try {
-        this.client = new GoogleGenAI({ apiKey });
-        this.hasApiKey = true;
-      } catch (err) {
-        console.warn('Failed to initialize GoogleGenAI client, falling back to local engine', err);
-        this.hasApiKey = false;
+  /** Lazily load `@google/genai` only when an API key is configured. */
+  private async getClient(): Promise<GoogleGenAI | null> {
+    if (!this.apiKey) return null;
+    if (this.clientInitAttempted) return this.client;
+
+    this.clientInitAttempted = true;
+    try {
+      const mod = await import('@google/genai');
+      const ClientCtor = mod.GoogleGenAI;
+      if (ClientCtor) {
+        this.client = new ClientCtor({ apiKey: this.apiKey });
       }
+    } catch (err: any) {
+      console.warn(
+        'Optional peerDependency @google/genai is unavailable or failed to initialize; using fallback engine:',
+        err?.message || err
+      );
+      this.client = null;
     }
+
+    return this.client;
   }
 
   /** Register a pluggable task handler with prompt builder and deterministic fallback. */
@@ -76,9 +90,10 @@ export class HybridAgentRuntime {
       metadata: options.metadata,
     };
 
-    if (this.hasApiKey && this.client) {
+    const client = await this.getClient();
+    if (client) {
       try {
-        const liveResult = await this.executeLiveGemini<TPayload, TResult>(handler, ctx);
+        const liveResult = await this.executeLiveGemini<TPayload, TResult>(client, handler, ctx);
         return {
           ...liveResult,
           latencyMs: Date.now() - startTime,
@@ -99,15 +114,14 @@ export class HybridAgentRuntime {
   }
 
   private async executeLiveGemini<TPayload, TResult>(
+    client: GoogleGenAI,
     handler: AgentTaskHandler<TPayload, TResult>,
     ctx: AgentTaskContext<TPayload>
   ): Promise<Omit<AgentExecutionResult<TResult>, 'latencyMs'>> {
-    if (!this.client) throw new Error('Client not initialized');
-
     const spec = handler.buildPrompt(ctx);
     const model = spec.model || this.defaultModel;
 
-    const response = await this.client.models.generateContent({
+    const response = await client.models.generateContent({
       model,
       contents: spec.prompt,
       config: {

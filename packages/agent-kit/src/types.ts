@@ -50,6 +50,7 @@ export interface AgentJob<TPayload = any, TResult = any> {
   locale?: string;
   taskKey: string;
   status: JobStatus;
+  attempts: number;
   inputPayload: TPayload;
   resultPayload: TResult | null;
   tokensUsed: number;
@@ -61,10 +62,16 @@ export interface AgentJob<TPayload = any, TResult = any> {
   error?: string;
 }
 
+export type MaybePromise<T> = T | Promise<T>;
+
+/**
+ * Storage interface for AgentQueueService. Supports both synchronous (in-memory)
+ * and asynchronous (Redis, Postgres, etc.) implementations.
+ */
 export interface JobStore {
-  get(jobId: string): AgentJob | null;
-  set(jobId: string, job: AgentJob): void;
-  listByTenant(tenantSlug: string): AgentJob[];
+  get(jobId: string): MaybePromise<AgentJob | null>;
+  set(jobId: string, job: AgentJob): MaybePromise<void>;
+  listByTenant(tenantSlug: string): MaybePromise<AgentJob[]>;
 }
 
 export interface LedgerEntry {
@@ -79,6 +86,7 @@ export interface LedgerEntry {
 export interface RateLimitResult {
   allowed: boolean;
   remaining: number;
+  resetAtMs: number;
 }
 
 export interface DebitResult {

@@ -1,28 +1,52 @@
 import { DebitResult, LedgerEntry, RateLimitResult } from './types';
 
+export interface TokenLedgerServiceOptions {
+  windowMs?: number;
+  maxLedgerEntries?: number;
+}
+
 /**
- * Per-tenant sliding-window rate limiter and atomic token quota ledger.
+ * Per-tenant true sliding-window rate limiter and bounded atomic token quota ledger.
  */
 export class TokenLedgerService {
   private readonly ledger: LedgerEntry[] = [];
-  private readonly rateLimits = new Map<string, { count: number; windowStart: number }>();
+  private readonly requestLogs = new Map<string, number[]>();
+  private readonly windowMs: number;
+  private readonly maxLedgerEntries: number;
 
-  public checkRateLimit(tenantId: string, maxPerMinute = 60): RateLimitResult {
-    const now = Date.now();
-    const windowMs = 60 * 1000;
-    const record = this.rateLimits.get(tenantId);
+  constructor(options: TokenLedgerServiceOptions = {}) {
+    this.windowMs = options.windowMs ?? 60 * 1000;
+    this.maxLedgerEntries = Math.max(1, options.maxLedgerEntries ?? 10000);
+  }
 
-    if (!record || now - record.windowStart > windowMs) {
-      this.rateLimits.set(tenantId, { count: 1, windowStart: now });
-      return { allowed: true, remaining: maxPerMinute - 1 };
+  /**
+   * True sliding-window log rate limiter: prunes timestamps outside `[now - windowMs, now]`
+   * and evicts empty tenant buckets to prevent unbounded memory growth.
+   */
+  public checkRateLimit(tenantId: string, maxPerWindow = 60, now = Date.now()): RateLimitResult {
+    const windowStart = now - this.windowMs;
+    const timestamps = this.requestLogs.get(tenantId) || [];
+
+    // Drop timestamps that have fallen out of the sliding window
+    const active = timestamps.filter((ts) => ts > windowStart);
+
+    if (active.length >= maxPerWindow) {
+      this.requestLogs.set(tenantId, active);
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAtMs: active[0] + this.windowMs,
+      };
     }
 
-    if (record.count >= maxPerMinute) {
-      return { allowed: false, remaining: 0 };
-    }
+    active.push(now);
+    this.requestLogs.set(tenantId, active);
 
-    record.count += 1;
-    return { allowed: true, remaining: maxPerMinute - record.count };
+    return {
+      allowed: true,
+      remaining: maxPerWindow - active.length,
+      resetAtMs: active[0] + this.windowMs,
+    };
   }
 
   public debitTokens(
@@ -53,7 +77,11 @@ export class TokenLedgerService {
       timestamp: new Date().toISOString(),
     };
 
+    if (this.ledger.length >= this.maxLedgerEntries) {
+      this.ledger.shift();
+    }
     this.ledger.push(entry);
+
     return { success: true, newConsumed, remaining };
   }
 
