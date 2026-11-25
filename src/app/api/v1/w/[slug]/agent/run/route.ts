@@ -49,13 +49,12 @@ export async function POST(
       );
     }
 
-    // 3. Token budget check & debit
+    // 3. Atomic token budget check & debit
     const estimatedTokens = 250;
     const debitResult = await tokenLedgerService.debitTokens(
       tenant.id,
       moduleKey,
       estimatedTokens,
-      tenant.settings.tokensConsumed,
       tenant.settings.tokenBudgetMonthly
     );
 

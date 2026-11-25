@@ -11,6 +11,13 @@ export {
 } from './token-ledger';
 export type { TokenLedgerServiceOptions } from './token-ledger';
 
+export { AgentOrchestrator } from './orchestrator';
+export type {
+  AgentOrchestratorOptions,
+  DispatchAgentTaskOptions,
+  DispatchAgentTaskResult,
+} from './orchestrator';
+
 export type {
   AgentExecutionOptions,
   AgentExecutionResult,

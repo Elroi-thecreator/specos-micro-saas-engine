@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
   AgentJob,
+  AgentOrchestrator,
   AgentQueueService,
   HybridAgentRuntime,
+  JobStatus,
   JobStore,
   TokenLedgerService,
 } from 'specos-agent-kit';
@@ -36,8 +38,20 @@ describe('specos-agent-kit package', () => {
     expect(res.resultPayload.summary).toBe('Offline summary (fr): Contract clause');
   });
 
-  it('throws when executing an unregistered taskKey', async () => {
+  it('rejects immediately when AbortSignal is already aborted or taskKey is missing', async () => {
     const runtime = new HybridAgentRuntime({ apiKey: '' });
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      runtime.execute({
+        taskKey: 'missingTask',
+        tenantSlug: 'acme',
+        payload: {},
+        signal: controller.signal,
+      })
+    ).rejects.toThrow('Agent execution aborted');
+
     await expect(
       runtime.execute({
         taskKey: 'missingTask',
@@ -47,7 +61,7 @@ describe('specos-agent-kit package', () => {
     ).rejects.toThrow("No agent task handler registered for taskKey 'missingTask'");
   });
 
-  it('supports async JobStore in AgentQueueService with bounded concurrency and retries', async () => {
+  it('supports async JobStore, retries, lifecycle hooks, and crash recovery', async () => {
     const backing = new Map<string, AgentJob>();
     const asyncStore: JobStore = {
       get: async (id) => backing.get(id) || null,
@@ -56,6 +70,8 @@ describe('specos-agent-kit package', () => {
       },
       listByTenant: async (slug) =>
         Array.from(backing.values()).filter((j) => j.tenantSlug === slug),
+      listByStatus: async (status: JobStatus) =>
+        Array.from(backing.values()).filter((j) => j.status === status),
     };
 
     const runtime = new HybridAgentRuntime({ apiKey: '' });
@@ -71,6 +87,7 @@ describe('specos-agent-kit package', () => {
       },
     });
 
+    const completedIds: string[] = [];
     const queue = new AgentQueueService({
       runtime,
       store: asyncStore,
@@ -78,6 +95,9 @@ describe('specos-agent-kit package', () => {
       concurrency: 2,
       maxRetries: 2,
       retryBaseDelayMs: 15,
+      onJobCompleted: (job) => {
+        completedIds.push(job.id);
+      },
     });
 
     const job = await queue.enqueueJob('tenant-a', 'flaky', { hello: 'world' });
@@ -89,11 +109,36 @@ describe('specos-agent-kit package', () => {
     expect(completed?.status).toBe('COMPLETED');
     expect(completed?.attempts).toBe(2);
     expect(completed?.resultPayload).toEqual({ ok: true, attempt: 2 });
+    expect(completedIds).toContain(job.id);
     expect(await queue.listJobsForTenant('tenant-a')).toHaveLength(1);
+
+    // Simulate stranded QUEUED job left in external store after process restart
+    backing.set('job_stranded_1', {
+      id: 'job_stranded_1',
+      tenantSlug: 'tenant-a',
+      taskKey: 'flaky',
+      status: 'QUEUED',
+      attempts: 0,
+      inputPayload: {},
+      resultPayload: null,
+      tokensUsed: 0,
+      latencyMs: 0,
+      createdAt: new Date().toISOString(),
+    });
+
+    const recoveredCount = await queue.recoverJobs();
+    expect(recoveredCount).toBe(1);
+    await new Promise((r) => setTimeout(r, 80));
+    expect((await queue.getJob('job_stranded_1'))?.status).toBe('COMPLETED');
   });
 
-  it('enforces true sliding-window rate limiting and bounded token ledger', async () => {
+  it('enforces true sliding-window rate limiting, maxPerWindow<=0 guard, and atomic ledger', async () => {
     const ledger = new TokenLedgerService({ windowMs: 1000, maxLedgerEntries: 2 });
+
+    // Guard against maxPerWindow <= 0 (must not return NaN resetAtMs)
+    const zeroLimit = await ledger.checkRateLimit('t0', 0, 500);
+    expect(zeroLimit.allowed).toBe(false);
+    expect(Number.isNaN(zeroLimit.resetAtMs)).toBe(false);
 
     // 2 requests at t=100 and t=600 -> limit 2 reached
     expect((await ledger.checkRateLimit('t1', 2, 100)).allowed).toBe(true);
@@ -105,34 +150,63 @@ describe('specos-agent-kit package', () => {
     expect(slid.allowed).toBe(true);
     expect(slid.remaining).toBe(0);
 
-    // Bounded ledger evicts oldest when maxLedgerEntries=2
-    await ledger.debitTokens('t1', 'ping', 100, 0, 1000);
-    await ledger.debitTokens('t1', 'ping', 100, 100, 1000);
-    await ledger.debitTokens('t1', 'ping', 100, 200, 1000);
+    // Atomic debit enforces budget inside the store and evicts oldest beyond maxLedgerEntries=2
+    expect((await ledger.debitTokens('t1', 'ping', 400, 1000)).newConsumed).toBe(400);
+    expect((await ledger.debitTokens('t1', 'ping', 400, 1000)).newConsumed).toBe(800);
+    expect((await ledger.debitTokens('t1', 'ping', 300, 1000)).success).toBe(false);
+    expect((await ledger.debitTokens('t1', 'ping', 200, 1000)).newConsumed).toBe(1000);
+    expect(await ledger.getConsumed('t1')).toBe(1000);
     expect(await ledger.getLedgerForTenant('t1')).toHaveLength(2);
   });
 
-  it('supports pluggable async RateLimitStore and LedgerStore', async () => {
-    const entries: any[] = [];
-    const ledger = new TokenLedgerService({
-      rateLimitStore: {
-        checkAndRecord: async (_id, max) => ({
-          allowed: true,
-          remaining: max - 1,
-          resetAtMs: Date.now() + 60000,
-        }),
-      },
-      ledgerStore: {
-        append: async (entry) => {
-          entries.push(entry);
-        },
-        listByTenant: async (tenantId) => entries.filter((e) => e.tenantId === tenantId),
-      },
+  it('wires rate-limit -> atomic debit -> enqueue via AgentOrchestrator', async () => {
+    const runtime = new HybridAgentRuntime({ apiKey: '' });
+    runtime.registerTask('echo', {
+      buildPrompt: () => ({ systemInstruction: 'Echo', prompt: 'Echo' }),
+      fallback: (ctx) => ({ result: ctx.payload, tokens: 50 }),
     });
 
-    const rate = await ledger.checkRateLimit('remote-tenant', 10);
-    expect(rate.allowed).toBe(true);
-    await ledger.debitTokens('remote-tenant', 'ping', 50, 0, 500);
-    expect(await ledger.getLedgerForTenant('remote-tenant')).toHaveLength(1);
+    const queue = new AgentQueueService({ runtime, dispatchDelayMs: 5 });
+    const ledger = new TokenLedgerService();
+    const orchestrator = new AgentOrchestrator({ ledger, queue });
+
+    const ok = await orchestrator.dispatch({
+      tenantId: 't-orch',
+      tenantSlug: 'orch',
+      taskKey: 'echo',
+      payload: { msg: 'hi' },
+      estimatedTokens: 300,
+      budgetMonthly: 500,
+      maxPerWindow: 2,
+    });
+    expect(ok.accepted).toBe(true);
+
+    const overBudget = await orchestrator.dispatch({
+      tenantId: 't-orch',
+      tenantSlug: 'orch',
+      taskKey: 'echo',
+      payload: { msg: 'hi2' },
+      estimatedTokens: 300,
+      budgetMonthly: 500,
+      maxPerWindow: 2,
+    });
+    expect(overBudget.accepted).toBe(false);
+    if (!overBudget.accepted) {
+      expect(overBudget.reason).toBe('BUDGET_EXCEEDED');
+    }
+
+    const rateLimited = await orchestrator.dispatch({
+      tenantId: 't-orch',
+      tenantSlug: 'orch',
+      taskKey: 'echo',
+      payload: { msg: 'hi3' },
+      estimatedTokens: 100,
+      budgetMonthly: 500,
+      maxPerWindow: 2,
+    });
+    expect(rateLimited.accepted).toBe(false);
+    if (!rateLimited.accepted) {
+      expect(rateLimited.reason).toBe('RATE_LIMITED');
+    }
   });
 });

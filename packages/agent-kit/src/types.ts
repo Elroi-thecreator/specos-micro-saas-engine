@@ -5,6 +5,7 @@ export interface AgentTaskContext<TPayload = any> {
   locale: string;
   payload: TPayload;
   metadata?: Record<string, any>;
+  signal?: AbortSignal;
 }
 
 export interface AgentPromptSpec {
@@ -31,6 +32,8 @@ export interface AgentExecutionOptions<TPayload = any> {
   locale?: string;
   payload: TPayload;
   metadata?: Record<string, any>;
+  timeoutMs?: number;
+  signal?: AbortSignal;
 }
 
 export interface AgentExecutionResult<TResult = any> {
@@ -58,6 +61,7 @@ export interface AgentJob<TPayload = any, TResult = any> {
   modelUsed?: string;
   isLive?: boolean;
   createdAt: string;
+  updatedAt?: string;
   completedAt?: string;
   error?: string;
 }
@@ -72,6 +76,7 @@ export interface JobStore {
   get(jobId: string): MaybePromise<AgentJob | null>;
   set(jobId: string, job: AgentJob): MaybePromise<void>;
   listByTenant(tenantSlug: string): MaybePromise<AgentJob[]>;
+  listByStatus?(status: JobStatus): MaybePromise<AgentJob[]>;
 }
 
 export interface LedgerEntry {
@@ -102,10 +107,18 @@ export interface RateLimitStore {
 }
 
 /**
- * Pluggable token ledger store (supports sync in-memory or async Postgres/Redis).
+ * Pluggable atomic token ledger store (supports sync in-memory or async Postgres/Redis).
+ * `tryDebit` MUST atomically check `consumed + tokensToDebit <= budgetMonthly` and persist the debit.
  */
 export interface LedgerStore {
-  append(entry: LedgerEntry): MaybePromise<void>;
+  tryDebit(
+    tenantId: string,
+    taskKey: string,
+    tokensToDebit: number,
+    budgetMonthly: number,
+    entryId: string
+  ): MaybePromise<DebitResult>;
+  getConsumed(tenantId: string): MaybePromise<number>;
   listByTenant(tenantId: string): MaybePromise<LedgerEntry[]>;
 }
 

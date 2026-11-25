@@ -1,5 +1,14 @@
+import { randomUUID } from 'crypto';
 import { HybridAgentRuntime } from './agent-runtime';
-import { AgentJob, JobStore } from './types';
+import { AgentJob, JobStatus, JobStore, MaybePromise } from './types';
+
+function createJobId(): string {
+  try {
+    return `job_${randomUUID()}`;
+  } catch {
+    return `job_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+  }
+}
 
 export class InMemoryJobStore implements JobStore {
   private readonly jobs = new Map<string, AgentJob>();
@@ -26,6 +35,10 @@ export class InMemoryJobStore implements JobStore {
   public listByTenant(tenantSlug: string): AgentJob[] {
     return Array.from(this.jobs.values()).filter((j) => j.tenantSlug === tenantSlug);
   }
+
+  public listByStatus(status: JobStatus): AgentJob[] {
+    return Array.from(this.jobs.values()).filter((j) => j.status === status);
+  }
 }
 
 export interface AgentQueueServiceOptions {
@@ -35,6 +48,8 @@ export interface AgentQueueServiceOptions {
   concurrency?: number;
   maxRetries?: number;
   retryBaseDelayMs?: number;
+  onJobCompleted?: (job: AgentJob) => MaybePromise<void>;
+  onJobFailed?: (job: AgentJob) => MaybePromise<void>;
 }
 
 export interface EnqueueJobMetadata {
@@ -45,7 +60,8 @@ export interface EnqueueJobMetadata {
 
 /**
  * Asynchronous tenant-scoped worker queue with bounded concurrency,
- * exponential-backoff retries, and an async-capable JobStore interface.
+ * exponential-backoff retries, crash-recovery (`recoverJobs`), lifecycle hooks,
+ * and an async-capable JobStore interface.
  */
 export class AgentQueueService {
   private readonly runtime: HybridAgentRuntime;
@@ -54,8 +70,11 @@ export class AgentQueueService {
   private readonly concurrency: number;
   private readonly maxRetries: number;
   private readonly retryBaseDelayMs: number;
+  private readonly onJobCompleted?: (job: AgentJob) => MaybePromise<void>;
+  private readonly onJobFailed?: (job: AgentJob) => MaybePromise<void>;
   private activeCount = 0;
   private readonly pendingQueue: Array<{ jobId: string; metadata?: Record<string, any> }> = [];
+  private readonly queuedOrActiveIds = new Set<string>();
 
   constructor(options: AgentQueueServiceOptions) {
     this.runtime = options.runtime;
@@ -64,6 +83,8 @@ export class AgentQueueService {
     this.concurrency = Math.max(1, options.concurrency ?? 5);
     this.maxRetries = Math.max(0, options.maxRetries ?? 2);
     this.retryBaseDelayMs = Math.max(10, options.retryBaseDelayMs ?? 50);
+    this.onJobCompleted = options.onJobCompleted;
+    this.onJobFailed = options.onJobFailed;
   }
 
   public async enqueueJob<TPayload = any>(
@@ -72,7 +93,8 @@ export class AgentQueueService {
     inputPayload: TPayload,
     options?: EnqueueJobMetadata
   ): Promise<AgentJob<TPayload>> {
-    const jobId = `job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const jobId = createJobId();
+    const nowIso = new Date().toISOString();
     const job: AgentJob<TPayload> = {
       id: jobId,
       tenantSlug,
@@ -85,17 +107,60 @@ export class AgentQueueService {
       resultPayload: null,
       tokensUsed: 0,
       latencyMs: 0,
-      createdAt: new Date().toISOString(),
+      createdAt: nowIso,
+      updatedAt: nowIso,
     };
 
     await this.store.set(jobId, job);
 
     setTimeout(() => {
-      this.pendingQueue.push({ jobId, metadata: options?.metadata });
-      this.drainQueue();
+      this.enqueueLocal(jobId, options?.metadata);
     }, this.dispatchDelayMs);
 
     return job;
+  }
+
+  /**
+   * Recover `QUEUED` jobs (and optionally stale `PROCESSING` jobs) from the JobStore
+   * after a process restart so external stores do not leave jobs stranded.
+   */
+  public async recoverJobs(options: { staleProcessingMs?: number } = {}): Promise<number> {
+    if (!this.store.listByStatus) {
+      return 0;
+    }
+
+    let recovered = 0;
+    const queued = await this.store.listByStatus('QUEUED');
+    for (const job of queued) {
+      if (!this.queuedOrActiveIds.has(job.id)) {
+        this.enqueueLocal(job.id);
+        recovered += 1;
+      }
+    }
+
+    if (options.staleProcessingMs !== undefined && options.staleProcessingMs >= 0) {
+      const cutoff = Date.now() - options.staleProcessingMs;
+      const processing = await this.store.listByStatus('PROCESSING');
+      for (const job of processing) {
+        const updatedMs = Date.parse(job.updatedAt || job.createdAt);
+        if (!this.queuedOrActiveIds.has(job.id) && updatedMs <= cutoff) {
+          job.status = 'QUEUED';
+          job.updatedAt = new Date().toISOString();
+          await this.store.set(job.id, job);
+          this.enqueueLocal(job.id);
+          recovered += 1;
+        }
+      }
+    }
+
+    return recovered;
+  }
+
+  private enqueueLocal(jobId: string, metadata?: Record<string, any>): void {
+    if (this.queuedOrActiveIds.has(jobId)) return;
+    this.queuedOrActiveIds.add(jobId);
+    this.pendingQueue.push({ jobId, metadata });
+    this.drainQueue();
   }
 
   private drainQueue(): void {
@@ -105,6 +170,7 @@ export class AgentQueueService {
       this.activeCount += 1;
       void this.processJob(next.jobId, next.metadata).finally(() => {
         this.activeCount -= 1;
+        this.queuedOrActiveIds.delete(next.jobId);
         this.drainQueue();
       });
     }
@@ -115,11 +181,13 @@ export class AgentQueueService {
     if (!job) return;
 
     job.status = 'PROCESSING';
+    job.updatedAt = new Date().toISOString();
     await this.store.set(jobId, job);
 
     let lastError: any;
     for (let attempt = 1; attempt <= this.maxRetries + 1; attempt++) {
       job.attempts = attempt;
+      job.updatedAt = new Date().toISOString();
       try {
         const executionResult = await this.runtime.execute({
           taskKey: job.taskKey,
@@ -137,7 +205,11 @@ export class AgentQueueService {
         job.isLive = executionResult.isLive;
         job.latencyMs = executionResult.latencyMs;
         job.completedAt = new Date().toISOString();
+        job.updatedAt = job.completedAt;
         await this.store.set(jobId, job);
+        if (this.onJobCompleted) {
+          await this.onJobCompleted(job);
+        }
         return;
       } catch (err: any) {
         lastError = err;
@@ -151,7 +223,11 @@ export class AgentQueueService {
     job.status = 'FAILED';
     job.error = lastError?.message || 'Agent execution failed';
     job.completedAt = new Date().toISOString();
+    job.updatedAt = job.completedAt;
     await this.store.set(jobId, job);
+    if (this.onJobFailed) {
+      await this.onJobFailed(job);
+    }
   }
 
   public async getJob(jobId: string): Promise<AgentJob | null> {

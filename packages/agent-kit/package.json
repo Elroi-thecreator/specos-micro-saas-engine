@@ -1,6 +1,6 @@
 {
   "name": "specos-agent-kit",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Multi-tenant hybrid Gemini agent runtime, async worker queue, and pluggable sliding-window rate limiter & token ledger",
   "license": "MIT",
   "repository": {
@@ -25,7 +25,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run ../../tests/agent-kit.test.ts"
   },
   "keywords": [
     "gemini",

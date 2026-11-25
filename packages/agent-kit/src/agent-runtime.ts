@@ -10,12 +10,13 @@ export interface HybridAgentRuntimeOptions {
   apiKey?: string;
   defaultModel?: string;
   fallbackModelLabel?: string;
+  timeoutMs?: number;
 }
 
 /**
  * Multi-tenant AI agent runtime supporting live Gemini execution via `@google/genai`
- * (lazily loaded only when an API key is configured) with automatic deterministic
- * fallback when offline, unauthenticated, or when `@google/genai` is not installed.
+ * (lazily loaded only when an API key is configured) with AbortSignal timeouts and
+ * automatic deterministic fallback when offline, unauthenticated, or when `@google/genai` is not installed.
  */
 export class HybridAgentRuntime {
   private client: GoogleGenAI | null = null;
@@ -23,11 +24,13 @@ export class HybridAgentRuntime {
   private readonly apiKey: string | undefined;
   private readonly defaultModel: string;
   private readonly fallbackModelLabel: string;
+  private readonly defaultTimeoutMs: number;
   private readonly handlers = new Map<string, AgentTaskHandler<any, any>>();
 
   constructor(options: HybridAgentRuntimeOptions = {}) {
     this.defaultModel = options.defaultModel || 'gemini-2.5-flash';
     this.fallbackModelLabel = options.fallbackModelLabel || 'specos-intelligent-engine (mock fallback)';
+    this.defaultTimeoutMs = Math.max(100, options.timeoutMs ?? 30000);
     this.apiKey =
       options.apiKey ??
       (typeof process !== 'undefined'
@@ -74,6 +77,10 @@ export class HybridAgentRuntime {
   public async execute<TPayload = any, TResult = any>(
     options: AgentExecutionOptions<TPayload>
   ): Promise<AgentExecutionResult<TResult>> {
+    if (options.signal?.aborted) {
+      throw new Error('Agent execution aborted');
+    }
+
     const startTime = Date.now();
     const handler = this.handlers.get(options.taskKey);
 
@@ -88,17 +95,28 @@ export class HybridAgentRuntime {
       locale: options.locale || 'en',
       payload: options.payload,
       metadata: options.metadata,
+      signal: options.signal,
     };
 
     const client = await this.getClient();
     if (client) {
+      const timeoutMs = Math.max(100, options.timeoutMs ?? this.defaultTimeoutMs);
       try {
-        const liveResult = await this.executeLiveGemini<TPayload, TResult>(client, handler, ctx);
+        const liveResult = await this.executeLiveGeminiWithTimeout<TPayload, TResult>(
+          client,
+          handler,
+          ctx,
+          timeoutMs,
+          options.signal
+        );
         return {
           ...liveResult,
           latencyMs: Date.now() - startTime,
         };
       } catch (err: any) {
+        if (options.signal?.aborted) {
+          throw err;
+        }
         console.warn('Gemini live execution failed or timed out, using local fallback:', err?.message || err);
       }
     }
@@ -113,38 +131,59 @@ export class HybridAgentRuntime {
     };
   }
 
-  private async executeLiveGemini<TPayload, TResult>(
+  private async executeLiveGeminiWithTimeout<TPayload, TResult>(
     client: GoogleGenAI,
     handler: AgentTaskHandler<TPayload, TResult>,
-    ctx: AgentTaskContext<TPayload>
+    ctx: AgentTaskContext<TPayload>,
+    timeoutMs: number,
+    externalSignal?: AbortSignal
   ): Promise<Omit<AgentExecutionResult<TResult>, 'latencyMs'>> {
-    const spec = handler.buildPrompt(ctx);
-    const model = spec.model || this.defaultModel;
+    const controller = new AbortController();
+    const onExternalAbort = () => controller.abort();
+    externalSignal?.addEventListener('abort', onExternalAbort, { once: true });
 
-    const response = await client.models.generateContent({
-      model,
-      contents: spec.prompt,
-      config: {
-        systemInstruction: spec.systemInstruction,
-        responseMimeType: spec.responseMimeType || 'application/json',
-      },
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeoutPromise = new Promise<never>((_resolve, reject) => {
+      timer = setTimeout(() => {
+        controller.abort();
+        reject(new Error(`Gemini execution timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
     });
 
-    const text = response.text || '{}';
-    let parsed: any;
     try {
-      parsed = JSON.parse(text);
-    } catch {
-      parsed = { raw: text };
+      const spec = handler.buildPrompt(ctx);
+      const model = spec.model || this.defaultModel;
+
+      const generatePromise = client.models.generateContent({
+        model,
+        contents: spec.prompt,
+        config: {
+          systemInstruction: spec.systemInstruction,
+          responseMimeType: spec.responseMimeType || 'application/json',
+          abortSignal: controller.signal,
+        },
+      });
+
+      const response = await Promise.race([generatePromise, timeoutPromise]);
+      const text = response.text || '{}';
+      let parsed: any;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        parsed = { raw: text };
+      }
+
+      const tokensUsed = response.usageMetadata?.totalTokenCount || 350;
+
+      return {
+        resultPayload: parsed as TResult,
+        tokensUsed,
+        modelUsed: `${model} (Live)`,
+        isLive: true,
+      };
+    } finally {
+      if (timer) clearTimeout(timer);
+      externalSignal?.removeEventListener('abort', onExternalAbort);
     }
-
-    const tokensUsed = response.usageMetadata?.totalTokenCount || 350;
-
-    return {
-      resultPayload: parsed as TResult,
-      tokensUsed,
-      modelUsed: `${model} (Live)`,
-      isLive: true,
-    };
   }
 }

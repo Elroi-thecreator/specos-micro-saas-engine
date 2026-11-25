@@ -28,10 +28,9 @@ describe('TokenLedgerService & Rate Limiting (ARCH-003)', () => {
   it('atomically debits tokens when balance is sufficient', async () => {
     const tenantId = `budget-tenant-${Date.now()}`;
     const budget = 10000;
-    const consumed = 2000;
-    const debit = 500;
 
-    const res = await tokenLedgerService.debitTokens(tenantId, 'docIntel', debit, consumed, budget);
+    await tokenLedgerService.debitTokens(tenantId, 'docIntel', 2000, budget);
+    const res = await tokenLedgerService.debitTokens(tenantId, 'docIntel', 500, budget);
 
     expect(res.success).toBe(true);
     expect(res.newConsumed).toBe(2500);
@@ -41,10 +40,9 @@ describe('TokenLedgerService & Rate Limiting (ARCH-003)', () => {
   it('rejects debit and prevents negative balances when exceeding monthly quota', async () => {
     const tenantId = `overdraft-tenant-${Date.now()}`;
     const budget = 10000;
-    const consumed = 9800;
-    const debit = 500;
 
-    const res = await tokenLedgerService.debitTokens(tenantId, 'docIntel', debit, consumed, budget);
+    await tokenLedgerService.debitTokens(tenantId, 'docIntel', 9800, budget);
+    const res = await tokenLedgerService.debitTokens(tenantId, 'docIntel', 500, budget);
 
     expect(res.success).toBe(false);
     expect(res.newConsumed).toBe(9800);
