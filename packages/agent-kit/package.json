@@ -1,0 +1,37 @@
+{
+  "name": "@specos/agent-kit",
+  "version": "1.0.0",
+  "description": "Multi-tenant hybrid Gemini agent runtime, async worker queue, and atomic token ledger & rate limiter",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "keywords": [
+    "gemini",
+    "ai-agents",
+    "multi-tenant",
+    "rate-limiter",
+    "token-ledger",
+    "job-queue"
+  ],
+  "peerDependencies": {
+    "@google/genai": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@google/genai": {
+      "optional": true
+    }
+  }
+}

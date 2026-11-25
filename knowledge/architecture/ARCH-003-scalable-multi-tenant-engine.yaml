@@ -13,8 +13,8 @@ rule: |
 do:
   - Enforce tenant verification and header injection (`x-tenant-id`) at the edge middleware layer.
   - Structure API routes under `/api/v1/w/[slug]/...` with strict schema validation and error boundaries.
-  - Implement an atomic token ledger that validates balances before agent execution.
-  - Provide asynchronous agent task dispatch with verifiable job IDs and status polling endpoints.
+  - Implement an atomic token ledger (`@specos/agent-kit` `TokenLedgerService`) that validates balances before agent execution.
+  - Provide asynchronous agent task dispatch (`@specos/agent-kit` `AgentQueueService`) with verifiable job IDs and status polling endpoints.
   - Design database schema with foreign keys, cascade rules, and composite indexes for high concurrency.
 dont:
   - Never run unbounded LLM inference directly in synchronous HTTP requests without timeouts or job tracking.

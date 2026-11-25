@@ -1,0 +1,47 @@
+name: Publish @specos/agent-kit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/agent-kit/**'
+    tags:
+      - 'agent-kit-v*'
+
+jobs:
+  publish:
+    name: Build, Test & Publish to npm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build @specos/agent-kit
+        run: npm run build:packages
+
+      - name: Run Test Suite (Vitest)
+        run: npm test
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          PKG_NAME=$(node -p "require('./packages/agent-kit/package.json').name")
+          PKG_VERSION=$(node -p "require('./packages/agent-kit/package.json').version")
+          if npm view "${PKG_NAME}@${PKG_VERSION}" version >/dev/null 2>&1; then
+            echo "${PKG_NAME}@${PKG_VERSION} is already published on npm. Bump version in packages/agent-kit/package.json to publish a new release."
+          else
+            npm publish --workspace=@specos/agent-kit --access public
+          fi

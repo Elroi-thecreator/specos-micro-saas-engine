@@ -5,9 +5,9 @@ domain: artificial-intelligence
 status: approved
 version: "1.0.0"
 rule: |
-  All autonomous capabilities MUST support hybrid runtime execution: real LLM inference via the
-  official Google Gen AI SDK (`@google/genai`) when an API key is configured, paired with seamless,
-  deterministic, and localized contextual mock fallback when running offline or without credentials.
+  All autonomous capabilities MUST support hybrid runtime execution via `@specos/agent-kit` (`HybridAgentRuntime`):
+  real LLM inference via the official Google Gen AI SDK (`@google/genai`) when an API key is configured,
+  paired with seamless, deterministic, and localized contextual mock fallback when running offline or without credentials.
 do:
   - Initialize the Google Gen AI client with environment credentials (`GEMINI_API_KEY`).
   - Pass the active tenant's operating locale and sensitivity settings directly into system prompts.
