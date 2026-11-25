@@ -89,6 +89,26 @@ export interface RateLimitResult {
   resetAtMs: number;
 }
 
+/**
+ * Pluggable sliding-window rate-limit store (supports sync in-memory or async Redis/DB).
+ */
+export interface RateLimitStore {
+  checkAndRecord(
+    tenantId: string,
+    maxPerWindow: number,
+    windowMs: number,
+    now: number
+  ): MaybePromise<RateLimitResult>;
+}
+
+/**
+ * Pluggable token ledger store (supports sync in-memory or async Postgres/Redis).
+ */
+export interface LedgerStore {
+  append(entry: LedgerEntry): MaybePromise<void>;
+  listByTenant(tenantId: string): MaybePromise<LedgerEntry[]>;
+}
+
 export interface DebitResult {
   success: boolean;
   newConsumed: number;

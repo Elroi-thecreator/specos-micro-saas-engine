@@ -1,8 +1,17 @@
 {
   "name": "specos-agent-kit",
-  "version": "1.1.0",
-  "description": "Multi-tenant hybrid Gemini agent runtime, async worker queue, and atomic token ledger & rate limiter",
+  "version": "1.2.0",
+  "description": "Multi-tenant hybrid Gemini agent runtime, async worker queue, and pluggable sliding-window rate limiter & token ledger",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Elroi-thecreator/specos-micro-saas-engine.git",
+    "directory": "packages/agent-kit"
+  },
+  "homepage": "https://github.com/Elroi-thecreator/specos-micro-saas-engine/tree/main/packages/agent-kit#readme",
+  "bugs": {
+    "url": "https://github.com/Elroi-thecreator/specos-micro-saas-engine/issues"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

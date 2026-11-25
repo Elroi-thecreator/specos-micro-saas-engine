@@ -1,33 +1,16 @@
-import { DebitResult, LedgerEntry, RateLimitResult } from './types';
+import { DebitResult, LedgerEntry, LedgerStore, RateLimitResult, RateLimitStore } from './types';
 
-export interface TokenLedgerServiceOptions {
-  windowMs?: number;
-  maxLedgerEntries?: number;
-}
-
-/**
- * Per-tenant true sliding-window rate limiter and bounded atomic token quota ledger.
- */
-export class TokenLedgerService {
-  private readonly ledger: LedgerEntry[] = [];
+export class InMemoryRateLimitStore implements RateLimitStore {
   private readonly requestLogs = new Map<string, number[]>();
-  private readonly windowMs: number;
-  private readonly maxLedgerEntries: number;
 
-  constructor(options: TokenLedgerServiceOptions = {}) {
-    this.windowMs = options.windowMs ?? 60 * 1000;
-    this.maxLedgerEntries = Math.max(1, options.maxLedgerEntries ?? 10000);
-  }
-
-  /**
-   * True sliding-window log rate limiter: prunes timestamps outside `[now - windowMs, now]`
-   * and evicts empty tenant buckets to prevent unbounded memory growth.
-   */
-  public checkRateLimit(tenantId: string, maxPerWindow = 60, now = Date.now()): RateLimitResult {
-    const windowStart = now - this.windowMs;
+  public checkAndRecord(
+    tenantId: string,
+    maxPerWindow: number,
+    windowMs: number,
+    now: number
+  ): RateLimitResult {
+    const windowStart = now - windowMs;
     const timestamps = this.requestLogs.get(tenantId) || [];
-
-    // Drop timestamps that have fallen out of the sliding window
     const active = timestamps.filter((ts) => ts > windowStart);
 
     if (active.length >= maxPerWindow) {
@@ -35,7 +18,7 @@ export class TokenLedgerService {
       return {
         allowed: false,
         remaining: 0,
-        resetAtMs: active[0] + this.windowMs,
+        resetAtMs: active[0] + windowMs,
       };
     }
 
@@ -45,17 +28,69 @@ export class TokenLedgerService {
     return {
       allowed: true,
       remaining: maxPerWindow - active.length,
-      resetAtMs: active[0] + this.windowMs,
+      resetAtMs: active[0] + windowMs,
     };
   }
+}
 
-  public debitTokens(
+export class InMemoryLedgerStore implements LedgerStore {
+  private readonly entries: LedgerEntry[] = [];
+  private readonly maxEntries: number;
+
+  constructor(maxEntries = 10000) {
+    this.maxEntries = Math.max(1, maxEntries);
+  }
+
+  public append(entry: LedgerEntry): void {
+    if (this.entries.length >= this.maxEntries) {
+      this.entries.shift();
+    }
+    this.entries.push(entry);
+  }
+
+  public listByTenant(tenantId: string): LedgerEntry[] {
+    return this.entries.filter((e) => e.tenantId === tenantId);
+  }
+}
+
+export interface TokenLedgerServiceOptions {
+  windowMs?: number;
+  maxLedgerEntries?: number;
+  rateLimitStore?: RateLimitStore;
+  ledgerStore?: LedgerStore;
+}
+
+/**
+ * Per-tenant true sliding-window rate limiter and atomic token quota ledger
+ * with pluggable async-capable RateLimitStore and LedgerStore interfaces.
+ */
+export class TokenLedgerService {
+  private readonly rateLimitStore: RateLimitStore;
+  private readonly ledgerStore: LedgerStore;
+  private readonly windowMs: number;
+
+  constructor(options: TokenLedgerServiceOptions = {}) {
+    this.windowMs = options.windowMs ?? 60 * 1000;
+    this.rateLimitStore = options.rateLimitStore || new InMemoryRateLimitStore();
+    this.ledgerStore =
+      options.ledgerStore || new InMemoryLedgerStore(options.maxLedgerEntries ?? 10000);
+  }
+
+  public async checkRateLimit(
+    tenantId: string,
+    maxPerWindow = 60,
+    now = Date.now()
+  ): Promise<RateLimitResult> {
+    return this.rateLimitStore.checkAndRecord(tenantId, maxPerWindow, this.windowMs, now);
+  }
+
+  public async debitTokens(
     tenantId: string,
     taskKey: string,
     tokensToDebit: number,
     currentConsumed: number,
     budgetMonthly: number
-  ): DebitResult {
+  ): Promise<DebitResult> {
     if (currentConsumed + tokensToDebit > budgetMonthly) {
       return {
         success: false,
@@ -77,15 +112,12 @@ export class TokenLedgerService {
       timestamp: new Date().toISOString(),
     };
 
-    if (this.ledger.length >= this.maxLedgerEntries) {
-      this.ledger.shift();
-    }
-    this.ledger.push(entry);
+    await this.ledgerStore.append(entry);
 
     return { success: true, newConsumed, remaining };
   }
 
-  public getLedgerForTenant(tenantId: string): LedgerEntry[] {
-    return this.ledger.filter((l) => l.tenantId === tenantId);
+  public async getLedgerForTenant(tenantId: string): Promise<LedgerEntry[]> {
+    return this.ledgerStore.listByTenant(tenantId);
   }
 }

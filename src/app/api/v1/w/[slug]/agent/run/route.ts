@@ -19,7 +19,7 @@ export async function POST(
   }
 
   // 1. Sliding window rate limiting
-  const rateCheck = tokenLedgerService.checkRateLimit(tenant.id, 60);
+  const rateCheck = await tokenLedgerService.checkRateLimit(tenant.id, 60);
   if (!rateCheck.allowed) {
     return NextResponse.json(
       { success: false, error: 'Rate limit exceeded. Max 60 requests/minute.' },
@@ -51,7 +51,7 @@ export async function POST(
 
     // 3. Token budget check & debit
     const estimatedTokens = 250;
-    const debitResult = tokenLedgerService.debitTokens(
+    const debitResult = await tokenLedgerService.debitTokens(
       tenant.id,
       moduleKey,
       estimatedTokens,

@@ -92,23 +92,47 @@ describe('specos-agent-kit package', () => {
     expect(await queue.listJobsForTenant('tenant-a')).toHaveLength(1);
   });
 
-  it('enforces true sliding-window rate limiting and bounded token ledger', () => {
+  it('enforces true sliding-window rate limiting and bounded token ledger', async () => {
     const ledger = new TokenLedgerService({ windowMs: 1000, maxLedgerEntries: 2 });
 
     // 2 requests at t=100 and t=600 -> limit 2 reached
-    expect(ledger.checkRateLimit('t1', 2, 100).allowed).toBe(true);
-    expect(ledger.checkRateLimit('t1', 2, 600).allowed).toBe(true);
-    expect(ledger.checkRateLimit('t1', 2, 900).allowed).toBe(false);
+    expect((await ledger.checkRateLimit('t1', 2, 100)).allowed).toBe(true);
+    expect((await ledger.checkRateLimit('t1', 2, 600)).allowed).toBe(true);
+    expect((await ledger.checkRateLimit('t1', 2, 900)).allowed).toBe(false);
 
     // At t=1150, t=100 has slid out of the 1000ms window while t=600 remains
-    const slid = ledger.checkRateLimit('t1', 2, 1150);
+    const slid = await ledger.checkRateLimit('t1', 2, 1150);
     expect(slid.allowed).toBe(true);
     expect(slid.remaining).toBe(0);
 
     // Bounded ledger evicts oldest when maxLedgerEntries=2
-    ledger.debitTokens('t1', 'ping', 100, 0, 1000);
-    ledger.debitTokens('t1', 'ping', 100, 100, 1000);
-    ledger.debitTokens('t1', 'ping', 100, 200, 1000);
-    expect(ledger.getLedgerForTenant('t1')).toHaveLength(2);
+    await ledger.debitTokens('t1', 'ping', 100, 0, 1000);
+    await ledger.debitTokens('t1', 'ping', 100, 100, 1000);
+    await ledger.debitTokens('t1', 'ping', 100, 200, 1000);
+    expect(await ledger.getLedgerForTenant('t1')).toHaveLength(2);
+  });
+
+  it('supports pluggable async RateLimitStore and LedgerStore', async () => {
+    const entries: any[] = [];
+    const ledger = new TokenLedgerService({
+      rateLimitStore: {
+        checkAndRecord: async (_id, max) => ({
+          allowed: true,
+          remaining: max - 1,
+          resetAtMs: Date.now() + 60000,
+        }),
+      },
+      ledgerStore: {
+        append: async (entry) => {
+          entries.push(entry);
+        },
+        listByTenant: async (tenantId) => entries.filter((e) => e.tenantId === tenantId),
+      },
+    });
+
+    const rate = await ledger.checkRateLimit('remote-tenant', 10);
+    expect(rate.allowed).toBe(true);
+    await ledger.debitTokens('remote-tenant', 'ping', 50, 0, 500);
+    expect(await ledger.getLedgerForTenant('remote-tenant')).toHaveLength(1);
   });
 });

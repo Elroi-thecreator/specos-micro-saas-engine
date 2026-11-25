@@ -4,7 +4,11 @@ export type { HybridAgentRuntimeOptions } from './agent-runtime';
 export { AgentQueueService, InMemoryJobStore } from './agent-queue';
 export type { AgentQueueServiceOptions, EnqueueJobMetadata } from './agent-queue';
 
-export { TokenLedgerService } from './token-ledger';
+export {
+  InMemoryLedgerStore,
+  InMemoryRateLimitStore,
+  TokenLedgerService,
+} from './token-ledger';
 export type { TokenLedgerServiceOptions } from './token-ledger';
 
 export type {
@@ -19,6 +23,8 @@ export type {
   JobStatus,
   JobStore,
   LedgerEntry,
+  LedgerStore,
   MaybePromise,
   RateLimitResult,
+  RateLimitStore,
 } from './types';
