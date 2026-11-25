@@ -4,7 +4,7 @@ Multi-tenant hybrid Gemini agent runtime, crash-resilient async worker queue, an
 
 ## Features
 
-- **Hybrid Gemini Runtime (`HybridAgentRuntime`)**: Lazily imports `@google/genai` (optional `peerDependency`) only when an API key is configured, enforces `AbortSignal` + `timeoutMs` timeouts, and falls back deterministically when offline or unauthenticated.
+- **Pluggable AI Provider (`HybridAgentRuntime` + `AIProvider`)**: Wrap **any** AI (OpenAI, Anthropic, Ollama, custom HTTP models, or built-in `GeminiProvider` which lazily imports `@google/genai`). Enforces `AbortSignal` + `timeoutMs` timeouts and falls back deterministically when offline or on provider error.
 - **Crash-Resilient Worker Queue (`AgentQueueService`)**: Bounded `concurrency`, exponential-backoff `maxRetries` / `retryBaseDelayMs`, lifecycle hooks (`onJobCompleted`, `onJobFailed`), `recoverJobs()` for restarting stranded jobs from an external `JobStore`, and async-capable `JobStore` (`InMemoryJobStore` by default).
 - **Atomic Token Ledger & Sliding-Window Rate Limiter (`TokenLedgerService`)**: True sliding-window timestamp log (`RateLimitStore`) and atomic `tryDebit(...)` quota enforcement (`LedgerStore`) with `InMemoryRateLimitStore` and `InMemoryLedgerStore` defaults.
 - **Integrated Orchestrator (`AgentOrchestrator`)**: Wires `checkRateLimit` -> atomic `debitTokens` -> `enqueueJob` in one call.
@@ -61,6 +61,44 @@ if (result.accepted) {
 
 // On startup with an external JobStore, recover any stranded QUEUED or stale PROCESSING jobs:
 await queue.recoverJobs({ staleProcessingMs: 60_000 });
+```
+
+## Plugging in Any AI Provider (`AIProvider`)
+
+```ts
+import { HybridAgentRuntime, type AIProvider } from 'specos-agent-kit';
+
+const openaiProvider: AIProvider = {
+  name: 'openai',
+  async generate({ model, systemInstruction, prompt, signal }) {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      signal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: systemInstruction },
+          { role: 'user', content: prompt },
+        ],
+      }),
+    });
+    const data = await res.json();
+    return {
+      text: data.choices[0].message.content,
+      tokensUsed: data.usage?.total_tokens,
+    };
+  },
+};
+
+const runtime = new HybridAgentRuntime({
+  provider: openaiProvider,
+  defaultModel: 'gpt-4o-mini',
+});
 ```
 
 ## Production Store Adapters (Reference Examples)

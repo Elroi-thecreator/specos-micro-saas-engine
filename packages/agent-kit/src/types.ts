@@ -44,6 +44,28 @@ export interface AgentExecutionResult<TResult = any> {
   latencyMs: number;
 }
 
+export interface AIProviderGenerateInput {
+  model: string;
+  systemInstruction: string;
+  prompt: string;
+  responseMimeType?: string;
+  signal: AbortSignal;
+}
+
+export interface AIProviderGenerateOutput {
+  text: string;
+  tokensUsed?: number;
+}
+
+/**
+ * Pluggable AI provider interface allowing HybridAgentRuntime to wrap
+ * any LLM (OpenAI, Anthropic, Gemini, Ollama, custom HTTP endpoints, etc.).
+ */
+export interface AIProvider {
+  readonly name: string;
+  generate(input: AIProviderGenerateInput): Promise<AIProviderGenerateOutput>;
+}
+
 export type JobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
 export interface AgentJob<TPayload = any, TResult = any> {

@@ -1,4 +1,4 @@
-export { HybridAgentRuntime } from './agent-runtime';
+export { GeminiProvider, HybridAgentRuntime } from './agent-runtime';
 export type { HybridAgentRuntimeOptions } from './agent-runtime';
 
 export { AgentQueueService, InMemoryJobStore } from './agent-queue';
@@ -26,6 +26,9 @@ export type {
   AgentPromptSpec,
   AgentTaskContext,
   AgentTaskHandler,
+  AIProvider,
+  AIProviderGenerateInput,
+  AIProviderGenerateOutput,
   DebitResult,
   JobStatus,
   JobStore,

@@ -4,9 +4,57 @@ import {
   AgentExecutionResult,
   AgentTaskContext,
   AgentTaskHandler,
+  AIProvider,
+  AIProviderGenerateInput,
+  AIProviderGenerateOutput,
 } from './types';
 
+export class GeminiProvider implements AIProvider {
+  public readonly name = 'gemini';
+  private client: GoogleGenAI | null = null;
+  private initAttempted = false;
+  private readonly apiKey: string;
+
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  private async getClient(): Promise<GoogleGenAI> {
+    if (!this.initAttempted) {
+      this.initAttempted = true;
+      const mod = await import('@google/genai');
+      const ClientCtor = mod.GoogleGenAI;
+      if (ClientCtor) {
+        this.client = new ClientCtor({ apiKey: this.apiKey });
+      }
+    }
+    if (!this.client) {
+      throw new Error('Optional peerDependency @google/genai is unavailable or failed to initialize');
+    }
+    return this.client;
+  }
+
+  public async generate(input: AIProviderGenerateInput): Promise<AIProviderGenerateOutput> {
+    const client = await this.getClient();
+    const response = await client.models.generateContent({
+      model: input.model,
+      contents: input.prompt,
+      config: {
+        systemInstruction: input.systemInstruction,
+        responseMimeType: input.responseMimeType || 'application/json',
+        abortSignal: input.signal,
+      },
+    });
+
+    return {
+      text: response.text || '{}',
+      tokensUsed: response.usageMetadata?.totalTokenCount,
+    };
+  }
+}
+
 export interface HybridAgentRuntimeOptions {
+  provider?: AIProvider;
   apiKey?: string;
   defaultModel?: string;
   fallbackModelLabel?: string;
@@ -14,14 +62,12 @@ export interface HybridAgentRuntimeOptions {
 }
 
 /**
- * Multi-tenant AI agent runtime supporting live Gemini execution via `@google/genai`
- * (lazily loaded only when an API key is configured) with AbortSignal timeouts and
- * automatic deterministic fallback when offline, unauthenticated, or when `@google/genai` is not installed.
+ * Multi-tenant AI agent runtime supporting any pluggable `AIProvider`
+ * (defaulting to `GeminiProvider` when an API key is configured) with
+ * AbortSignal timeouts and deterministic offline fallback.
  */
 export class HybridAgentRuntime {
-  private client: GoogleGenAI | null = null;
-  private clientInitAttempted = false;
-  private readonly apiKey: string | undefined;
+  private readonly provider: AIProvider | null;
   private readonly defaultModel: string;
   private readonly fallbackModelLabel: string;
   private readonly defaultTimeoutMs: number;
@@ -31,34 +77,17 @@ export class HybridAgentRuntime {
     this.defaultModel = options.defaultModel || 'gemini-2.5-flash';
     this.fallbackModelLabel = options.fallbackModelLabel || 'specos-intelligent-engine (mock fallback)';
     this.defaultTimeoutMs = Math.max(100, options.timeoutMs ?? 30000);
-    this.apiKey =
-      options.apiKey ??
-      (typeof process !== 'undefined'
-        ? process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY
-        : undefined);
-  }
 
-  /** Lazily load `@google/genai` only when an API key is configured. */
-  private async getClient(): Promise<GoogleGenAI | null> {
-    if (!this.apiKey) return null;
-    if (this.clientInitAttempted) return this.client;
-
-    this.clientInitAttempted = true;
-    try {
-      const mod = await import('@google/genai');
-      const ClientCtor = mod.GoogleGenAI;
-      if (ClientCtor) {
-        this.client = new ClientCtor({ apiKey: this.apiKey });
-      }
-    } catch (err: any) {
-      console.warn(
-        'Optional peerDependency @google/genai is unavailable or failed to initialize; using fallback engine:',
-        err?.message || err
-      );
-      this.client = null;
+    if (options.provider) {
+      this.provider = options.provider;
+    } else {
+      const apiKey =
+        options.apiKey ??
+        (typeof process !== 'undefined'
+          ? process.env.GEMINI_API_KEY || process.env.GOOGLE_GENAI_API_KEY
+          : undefined);
+      this.provider = apiKey ? new GeminiProvider(apiKey) : null;
     }
-
-    return this.client;
   }
 
   /** Register a pluggable task handler with prompt builder and deterministic fallback. */
@@ -98,12 +127,11 @@ export class HybridAgentRuntime {
       signal: options.signal,
     };
 
-    const client = await this.getClient();
-    if (client) {
+    if (this.provider) {
       const timeoutMs = Math.max(100, options.timeoutMs ?? this.defaultTimeoutMs);
       try {
-        const liveResult = await this.executeLiveGeminiWithTimeout<TPayload, TResult>(
-          client,
+        const liveResult = await this.executeProviderWithTimeout<TPayload, TResult>(
+          this.provider,
           handler,
           ctx,
           timeoutMs,
@@ -117,7 +145,10 @@ export class HybridAgentRuntime {
         if (options.signal?.aborted) {
           throw err;
         }
-        console.warn('Gemini live execution failed or timed out, using local fallback:', err?.message || err);
+        console.warn(
+          `Provider '${this.provider.name}' execution failed or timed out, using local fallback:`,
+          err?.message || err
+        );
       }
     }
 
@@ -131,8 +162,8 @@ export class HybridAgentRuntime {
     };
   }
 
-  private async executeLiveGeminiWithTimeout<TPayload, TResult>(
-    client: GoogleGenAI,
+  private async executeProviderWithTimeout<TPayload, TResult>(
+    provider: AIProvider,
     handler: AgentTaskHandler<TPayload, TResult>,
     ctx: AgentTaskContext<TPayload>,
     timeoutMs: number,
@@ -146,7 +177,7 @@ export class HybridAgentRuntime {
     const timeoutPromise = new Promise<never>((_resolve, reject) => {
       timer = setTimeout(() => {
         controller.abort();
-        reject(new Error(`Gemini execution timed out after ${timeoutMs}ms`));
+        reject(new Error(`Provider '${provider.name}' execution timed out after ${timeoutMs}ms`));
       }, timeoutMs);
     });
 
@@ -154,18 +185,18 @@ export class HybridAgentRuntime {
       const spec = handler.buildPrompt(ctx);
       const model = spec.model || this.defaultModel;
 
-      const generatePromise = client.models.generateContent({
-        model,
-        contents: spec.prompt,
-        config: {
+      const output = await Promise.race([
+        provider.generate({
+          model,
           systemInstruction: spec.systemInstruction,
+          prompt: spec.prompt,
           responseMimeType: spec.responseMimeType || 'application/json',
-          abortSignal: controller.signal,
-        },
-      });
+          signal: controller.signal,
+        }),
+        timeoutPromise,
+      ]);
 
-      const response = await Promise.race([generatePromise, timeoutPromise]);
-      const text = response.text || '{}';
+      const text = output.text || '{}';
       let parsed: any;
       try {
         parsed = JSON.parse(text);
@@ -173,12 +204,13 @@ export class HybridAgentRuntime {
         parsed = { raw: text };
       }
 
-      const tokensUsed = response.usageMetadata?.totalTokenCount || 350;
+      const tokensUsed = output.tokensUsed ?? 350;
+      const label = provider.name === 'gemini' ? 'Live' : provider.name;
 
       return {
         resultPayload: parsed as TResult,
         tokensUsed,
-        modelUsed: `${model} (Live)`,
+        modelUsed: `${model} (${label})`,
         isLive: true,
       };
     } finally {

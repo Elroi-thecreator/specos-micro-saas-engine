@@ -3,6 +3,7 @@ import {
   AgentJob,
   AgentOrchestrator,
   AgentQueueService,
+  AIProvider,
   HybridAgentRuntime,
   JobStatus,
   JobStore,
@@ -208,5 +209,60 @@ describe('specos-agent-kit package', () => {
     if (!rateLimited.accepted) {
       expect(rateLimited.reason).toBe('RATE_LIMITED');
     }
+  });
+
+  it('supports any custom AIProvider and falls back on timeout', async () => {
+    const customProvider: AIProvider = {
+      name: 'custom-llm',
+      generate: async ({ prompt }) => ({
+        text: JSON.stringify({ answer: `echo:${prompt}` }),
+        tokensUsed: 77,
+      }),
+    };
+
+    const runtime = new HybridAgentRuntime({
+      provider: customProvider,
+      defaultModel: 'custom-model-v1',
+    });
+    runtime.registerTask('ask', {
+      buildPrompt: (ctx) => ({ systemInstruction: 'sys', prompt: ctx.payload.q }),
+      fallback: () => ({ result: { answer: 'fallback' }, tokens: 10 }),
+    });
+
+    const liveRes = await runtime.execute({
+      taskKey: 'ask',
+      tenantSlug: 'acme',
+      payload: { q: 'hello' },
+    });
+    expect(liveRes.isLive).toBe(true);
+    expect(liveRes.modelUsed).toBe('custom-model-v1 (custom-llm)');
+    expect(liveRes.tokensUsed).toBe(77);
+    expect(liveRes.resultPayload).toEqual({ answer: 'echo:hello' });
+
+    // Timeout triggers AbortSignal and falls back cleanly
+    const hangingProvider: AIProvider = {
+      name: 'slow-llm',
+      generate: ({ signal }) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener('abort', () => reject(new Error('aborted')));
+        }),
+    };
+
+    const slowRuntime = new HybridAgentRuntime({
+      provider: hangingProvider,
+      timeoutMs: 100,
+    });
+    slowRuntime.registerTask('ask', {
+      buildPrompt: (ctx) => ({ systemInstruction: 'sys', prompt: ctx.payload.q }),
+      fallback: () => ({ result: { answer: 'timeout-fallback' }, tokens: 15 }),
+    });
+
+    const fallbackRes = await slowRuntime.execute({
+      taskKey: 'ask',
+      tenantSlug: 'acme',
+      payload: { q: 'hello' },
+    });
+    expect(fallbackRes.isLive).toBe(false);
+    expect(fallbackRes.resultPayload).toEqual({ answer: 'timeout-fallback' });
   });
 });
