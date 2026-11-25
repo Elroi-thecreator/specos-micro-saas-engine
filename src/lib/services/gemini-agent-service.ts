@@ -2,7 +2,7 @@ import {
   AgentExecutionResult,
   AgentTaskContext,
   HybridAgentRuntime,
-} from '@specos/agent-kit';
+} from 'specos-agent-kit';
 import { ModuleKey, SupportedLocale } from '../types';
 
 export interface GeminiAgentExecutionOptions {

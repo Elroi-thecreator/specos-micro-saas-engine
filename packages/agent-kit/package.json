@@ -1,5 +1,5 @@
 {
-  "name": "@specos/agent-kit",
+  "name": "specos-agent-kit",
   "version": "1.0.0",
   "description": "Multi-tenant hybrid Gemini agent runtime, async worker queue, and atomic token ledger & rate limiter",
   "license": "MIT",

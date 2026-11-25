@@ -2,7 +2,7 @@ import {
   AgentJob as KitAgentJob,
   AgentQueueService as KitAgentQueueService,
   JobStatus,
-} from '@specos/agent-kit';
+} from 'specos-agent-kit';
 import { geminiAgentRuntime } from './gemini-agent-service';
 import { ModuleKey, SupportedLocale } from '../types';
 

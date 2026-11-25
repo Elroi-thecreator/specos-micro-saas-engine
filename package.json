@@ -9,14 +9,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "npm run build:packages && next build",
-    "build:packages": "npm --workspace=@specos/agent-kit run build",
+    "build:packages": "npm --workspace=specos-agent-kit run build",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run"
   },
   "dependencies": {
     "@google/genai": "^3.6.1",
-    "@specos/agent-kit": "^1.0.0",
+    "specos-agent-kit": "^1.0.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.453.0",
     "next": "^14.2.15",

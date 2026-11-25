@@ -1,4 +1,4 @@
-# @specos/agent-kit
+# specos-agent-kit
 
 Multi-tenant hybrid Gemini agent runtime, asynchronous worker queue, and atomic token ledger & sliding-window rate limiter.
 
@@ -16,7 +16,7 @@ import {
   HybridAgentRuntime,
   AgentQueueService,
   TokenLedgerService,
-} from '@specos/agent-kit';
+} from 'specos-agent-kit';
 
 const runtime = new HybridAgentRuntime();
 runtime.registerTask('summarize', {

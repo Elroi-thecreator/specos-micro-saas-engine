@@ -5,9 +5,9 @@ import {
   HybridAgentRuntime,
   JobStore,
   TokenLedgerService,
-} from '@specos/agent-kit';
+} from 'specos-agent-kit';
 
-describe('@specos/agent-kit package', () => {
+describe('specos-agent-kit package', () => {
   it('supports registering and executing custom pluggable tasks with fallback', async () => {
     const runtime = new HybridAgentRuntime({ apiKey: '' });
     runtime.registerTask<{ text: string }, { summary: string }>('customSummarize', {
