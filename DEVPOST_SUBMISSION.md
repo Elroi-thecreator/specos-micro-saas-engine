@@ -4,7 +4,8 @@
 > **Target Track:** **Skeleton Crew**  
 > **Bonus Category Eligibility:** **Best Kiro Crew App** ($4,000) &bull; **Best Startup Project** ($4,000)  
 > **Live Production URL:** [https://specos-micro-saas-engine.vercel.app](https://specos-micro-saas-engine.vercel.app)  
-> **GitHub Repository:** [https://github.com/Elroi-thecreator/specos-micro-saas-engine](https://github.com/Elroi-thecreator/specos-micro-saas-engine)
+> **GitHub Repository:** [https://github.com/Elroi-thecreator/specos-micro-saas-engine](https://github.com/Elroi-thecreator/specos-micro-saas-engine)  
+> **npm Package:** [`specos-agent-kit`](https://www.npmjs.com/package/specos-agent-kit) (`v1.3.0`)
 
 ---
 
@@ -85,7 +86,10 @@ SpecOS was built natively from day one around the Kiro specification, steering, 
    - specos-code-audit: DevSecOps auditor inspecting codebases against Kiro specs and architectural guidelines.
 
 5. Continuous Knowledge Base (/knowledge/):
-   - Grounded in 8 formal standards in knowledge/index.yaml and compiled into knowledge/INJECTION.md.
+   - Grounded in 12 formal standards in knowledge/index.yaml (ARCH-001..004, DEV-001..005, PROD-001..003) using token-efficient sparse retrieval.
+
+6. Published Open-Source Core Package (specos-agent-kit on npm):
+   - Extracted the multi-tenant hybrid Gemini runtime, crash-resilient worker queue (bounded concurrency, retries, recoverJobs), and atomic sliding-window rate limiter & token ledger into the standalone MIT-licensed npm package `specos-agent-kit` (packages/agent-kit), automated via GitHub Actions and verified by 25 Vitest tests.
 
 All /.kiro files are tracked in the public root commit at: https://github.com/Elroi-thecreator/specos-micro-saas-engine/tree/main/.kiro
 ```
@@ -94,7 +98,7 @@ All /.kiro files are tracked in the public root commit at: https://github.com/El
 ```text
 100% NEW Project created from scratch specifically for the Kiroween 2026 Hackathon. 
 
-Only standard open-source libraries were used: Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Lucide React icons, and Prisma ORM. No pre-existing proprietary codebase, commercial starter kits, or third-party SaaS boilerplates were used.
+Only standard open-source libraries were used: Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, `@google/genai`, Lucide React icons, Vitest, and Prisma ORM—alongside our own newly created open-source workspace package `specos-agent-kit` (`packages/agent-kit`). No pre-existing proprietary codebase, commercial starter kits, or third-party SaaS boilerplates were used.
 ```
 
 ---
@@ -179,8 +183,8 @@ SpecOS is an autonomous multi-tenant micro-SaaS operating system featuring:
 4. **Separated Tenant Admin Centers:**
    - Disparate administrative duties are split into dedicated sub-centers: `/admin/general` (Branding & Locale), `/admin/modules` (AI Gates), `/admin/sections` (Layout), and `/admin/billing` (Token Budget & Rate Limits).
 
-5. **High-Scale Asynchronous Architecture:**
-   - Decoupled worker queue returning `202 Accepted` with verifiable job IDs (`job_*`), edge middleware tenant injection, sliding-window rate limits (60 req/min), and atomic token ledger debits.
+5. **High-Scale Asynchronous Architecture (`specos-agent-kit`):**
+   - Powered by our published open-source npm package [`specos-agent-kit`](https://www.npmjs.com/package/specos-agent-kit): decoupled worker queue (`AgentQueueService`) returning `202 Accepted` with verifiable job IDs (`job_*`), bounded concurrency, exponential-backoff retries, crash recovery (`recoverJobs`), `AbortSignal` timeouts (`HybridAgentRuntime`), true sliding-window rate limits (60 req/min), and atomic `LedgerStore.tryDebit` quota enforcement.
 
 6. **Deep Multilingual Support (7 Locales + RTL):**
    - Complete localized UI and agent prompt pipelines across English, Spanish, French, German, Japanese, Hindi, and Arabic (with automatic bidirectional `dir="rtl"` layout).
@@ -198,8 +202,10 @@ SpecOS was engineered from day one around **Kiro-Native Spec-Driven Development*
 - **Kiro Automated Hooks (`.kiro/hooks/`):**
   - `tenant-security-hook.json`: Automated pre-commit security linting preventing unpartitioned queries.
 - **Continuous Knowledge Base (`knowledge/`):**
-  - Grounded in 8 formal architectural units (`ARCH-001`, `ARCH-002`, `ARCH-003`, `DEV-001`, `DEV-002`, `PROD-001`, `PROD-002`, `PROD-003`) compiled into `knowledge/INJECTION.md`.
-- **Full-Stack Stack:** Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS (Enterprise Light Theme), Lucide Icons, Prisma relational schema, and Vercel edge deployment.
+  - Grounded in 12 formal architectural, development, and product units (`ARCH-001`–`ARCH-004`, `DEV-001`–`DEV-005`, `PROD-001`–`PROD-003`) using sparse retrieval (`DEV-005`).
+- **Reusable Open-Source Engine (`packages/agent-kit` / `specos-agent-kit` on npm):**
+  - Published as a standalone TypeScript/Node.js package (`HybridAgentRuntime`, `AgentQueueService`, `TokenLedgerService`, `AgentOrchestrator`) with pluggable async `JobStore`, `RateLimitStore`, and `LedgerStore` interfaces, automated CI/publish via GitHub Actions, and 25 passing Vitest unit/integration tests.
+- **Full-Stack Stack:** Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS (Enterprise Light Theme), `@google/genai`, Lucide Icons, Vitest, Prisma relational schema, and Vercel edge deployment.
 
 ---
 
@@ -212,9 +218,10 @@ SpecOS was engineered from day one around **Kiro-Native Spec-Driven Development*
 
 ## Accomplishments that we're proud of
 - 🚀 **1-Click SaaS Transformation:** Demonstrating how one codebase can power a Japanese Legal SaaS and a Spanish Support Swarm with zero code changes.
+- 📦 **Published Open-Source npm Package (`specos-agent-kit`):** Extracted the core hybrid Gemini runtime, crash-resilient worker queue, and atomic token ledger/rate limiter into a reusable npm package with automated CI publishing.
 - ⚡ **Sub-Second Global Deployment:** Live in production on Vercel with zero cold-start bottlenecks.
 - 🛡️ **Super Admin Control Plane:** Giving operators an enterprise-grade control console with real-time preview tenant provisioning.
-- 💯 **100% Kiro Native:** Complete compliance with `.kiro/` specifications, steering files, and hooks.
+- 💯 **100% Kiro Native:** Complete compliance with `.kiro/` specifications, steering files, and hooks, backed by 25 automated Vitest tests.
 
 ---
 
@@ -234,6 +241,7 @@ SpecOS was engineered from day one around **Kiro-Native Spec-Driven Development*
 ## Links
 - **Live Production App:** https://specos-micro-saas-engine.vercel.app
 - **Public GitHub Repository:** https://github.com/Elroi-thecreator/specos-micro-saas-engine
+- **Published npm Package (`specos-agent-kit`):** https://www.npmjs.com/package/specos-agent-kit
 - **Super Admin Console:** https://specos-micro-saas-engine.vercel.app/super-admin
 ```
 
@@ -242,5 +250,5 @@ SpecOS was engineered from day one around **Kiro-Native Spec-Driven Development*
 ## 🏷️ Section 5: "Built with" Tags
 
 ```text
-kiro, next.js, react, typescript, tailwindcss, vercel, prisma, edge-middleware, ai-agents, multi-tenancy, i18n, lucide-react, cloudflare
+kiro, next.js, react, typescript, tailwindcss, gemini, google-genai, npm, vitest, vercel, prisma, edge-middleware, ai-agents, multi-tenancy, i18n, lucide-react, cloudflare
 ```
