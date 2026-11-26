@@ -12,7 +12,7 @@ do:
   - Use `next-intl` or equivalent type-safe localization bundles for all UI strings.
   - Support English (en), Spanish (es), French (fr), German (de), Japanese (ja), Hindi (hi), and Arabic (ar).
   - Include bidirectional (RTL) layout support for Arabic.
-  - Inject localized steering instructions into AI agents: "Always respond and format reports in {locale}".
+  - "Inject localized steering instructions into AI agents: Always respond and format reports in {locale}."
 dont:
   - Never hardcode user-facing strings directly in JSX or templates.
   - Never generate English-only agent responses when a tenant has configured a non-English default locale.

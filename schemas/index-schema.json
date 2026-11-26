@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AKB Master Index & Catalog Router Specification",
+  "description": "Schema defining the root knowledge/index.yaml and domain sub-catalogs.",
+  "type": "object",
+  "required": [
+    "system_name"
+  ],
+  "properties": {
+    "system_name": {
+      "type": "string",
+      "description": "System name or platform identifier."
+    },
+    "repository_root": {
+      "type": "string",
+      "description": "Normalized repository root directory path."
+    },
+    "description": {
+      "type": "string",
+      "description": "Overview description of the system or bounded context."
+    },
+    "knowledge_units_count": {
+      "type": "integer",
+      "description": "Total number of active knowledge units indexed."
+    },
+    "last_updated": {
+      "type": "string",
+      "description": "Date string when the catalog was last updated (YYYY-MM-DD)."
+    },
+    "knowledge_units": {
+      "type": "object",
+      "description": "Inventory of knowledge units grouped by domain.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "file",
+            "title"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "file": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "purpose": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "domains": {
+      "type": "array",
+      "description": "Federated domain catalog references (Namespaced Central Hub).",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "catalog"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "catalog": {
+            "type": "string"
+          },
+          "applies_to": {
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

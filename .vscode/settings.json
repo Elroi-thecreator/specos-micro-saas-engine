@@ -1,0 +1,13 @@
+{
+  "yaml.schemas": {
+    "./schemas/knowledge-unit.json": [
+      "knowledge/**/*.yaml",
+      "!knowledge/index.yaml",
+      "!knowledge/**/index.yaml"
+    ],
+    "./schemas/index-schema.json": [
+      "knowledge/index.yaml",
+      "knowledge/**/index.yaml"
+    ]
+  }
+}

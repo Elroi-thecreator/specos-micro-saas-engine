@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AKB Knowledge Unit Specification",
+  "description": "Schema defining atomic YAML knowledge units (standards, rules, and architecture decisions) for AI coding assistants.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "title",
+    "domain"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique immutable identifier for this knowledge unit (e.g. ARCH-SYS-001, DEV-TS-001, ADR-001).",
+      "pattern": "^[A-Za-z0-9]+([_-][A-Za-z0-9]+)*$"
+    },
+    "type": {
+      "type": "string",
+      "description": "Category type of the knowledge unit.",
+      "enum": [
+        "architecture_standard",
+        "development_standard",
+        "product_rule",
+        "security_standard",
+        "architecture_decision"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title summarizing the unit directive."
+    },
+    "domain": {
+      "type": "string",
+      "description": "Bounded context or architectural domain (e.g. architecture, development, product, decisions, billing, core)."
+    },
+    "status": {
+      "type": "string",
+      "description": "Current lifecycle status.",
+      "enum": [
+        "approved",
+        "draft",
+        "deprecated",
+        "accepted",
+        "proposed",
+        "locked"
+      ],
+      "default": "approved"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this knowledge unit specification.",
+      "default": "1.0.0"
+    },
+    "authority": {
+      "type": "object",
+      "description": "Organizational authority and confidence level.",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "official",
+            "guideline",
+            "experimental",
+            "human_curated"
+          ],
+          "default": "official"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "verified"
+          ],
+          "default": "high"
+        }
+      }
+    },
+    "owner": {
+      "type": "object",
+      "description": "Ownership team or persona.",
+      "properties": {
+        "team": {
+          "type": "string",
+          "description": "Team name responsible for enforcing this rule."
+        }
+      }
+    },
+    "applies_to": {
+      "type": "array",
+      "description": "List of file globs, directory paths, or component tags to which this invariant strictly applies.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rule": {
+      "type": "string",
+      "description": "Primary normative architectural rule or directive enforced by this unit."
+    },
+    "decision": {
+      "type": "string",
+      "description": "Architectural decision statement (for type: architecture_decision)."
+    },
+    "context": {
+      "type": "string",
+      "description": "Problem context and historical motivation."
+    },
+    "do": {
+      "type": "array",
+      "description": "Prescriptive action items and best practices that developers and AI agents must follow.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dont": {
+      "type": "array",
+      "description": "Strict prohibitions and anti-patterns that must not be introduced.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reason": {
+      "type": "string",
+      "description": "Architectural rationale explaining why this invariant is necessary."
+    },
+    "related_items": {
+      "type": "array",
+      "description": "Cross-reference IDs to related Knowledge Units (e.g. ARCH-SYS-001).",
+      "items": {
+        "type": "string"
+      }
+    },
+    "guard_patterns": {
+      "type": "array",
+      "description": "Optional explicit AST S-expression (ast_query) and/or regular expression rules enforced by akbo guard / akbo check.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "Fallback or primary regular expression pattern."
+          },
+          "flags": {
+            "type": "string",
+            "description": "Optional regex flags (default: \"im\")."
+          },
+          "ast_query": {
+            "type": "string",
+            "description": "Optional Tree-sitter S-expression query evaluated on parsed AST nodes."
+          },
+          "strictAstOnly": {
+            "type": "boolean",
+            "description": "If true, skip regex fallback when AST runtime is unavailable."
+          },
+          "reason": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "block",
+              "warn"
+            ]
+          }
+        }
+      }
+    },
+    "skill_file": {
+      "type": "string",
+      "description": "Relative path to the original human-curated SKILL.md file if imported from an agent skill."
+    },
+    "reference_files": {
+      "type": "array",
+      "description": "Discovered companion reference documentation files (e.g. references/*.md) supporting this skill.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workflow_gates": {
+      "type": "array",
+      "description": "Ordered procedural implementation gates or verification steps extracted from the skill.",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

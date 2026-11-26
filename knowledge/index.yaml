@@ -1,54 +1,45 @@
+system_name: specos-micro-saas-engine
+repository_root: .
+description: SpecOS Autonomous Multi-Tenant & Multilingual Micro-SaaS Engine
 knowledge_units_count: 12
-last_updated: "2026-11-25"
-domains:
+last_updated: "2026-11-26"
+knowledge_units:
   architecture:
     - id: ARCH-001
       title: Multi-Tenant Data & Workspace Isolation
-      file: architecture/ARCH-001-multi-tenant-isolation.yaml
-      status: approved
+      file: knowledge/architecture/ARCH-001-multi-tenant-isolation.yaml
     - id: ARCH-002
       title: Modular Agent Capabilities & Configuration Engine
-      file: architecture/ARCH-002-modular-agent-registry.yaml
-      status: approved
+      file: knowledge/architecture/ARCH-002-modular-agent-registry.yaml
     - id: ARCH-003
       title: High-Scale Multi-Tenant Data & Worker Architecture
-      file: architecture/ARCH-003-scalable-multi-tenant-engine.yaml
-      status: approved
+      file: knowledge/architecture/ARCH-003-scalable-multi-tenant-engine.yaml
     - id: ARCH-004
       title: Hybrid Live AI & Contextual Fallback Swarm Runtime
-      file: architecture/ARCH-004-hybrid-ai-runtime.yaml
-      status: approved
+      file: knowledge/architecture/ARCH-004-hybrid-ai-runtime.yaml
   development:
     - id: DEV-001
       title: Internationalization (i18n) and Localized Prompting
-      file: development/DEV-001-multilingual-i18n-standards.yaml
-      status: approved
+      file: knowledge/development/DEV-001-multilingual-i18n-standards.yaml
     - id: DEV-002
       title: Enterprise-Grade Light UI/UX Design System
-      file: development/DEV-002-enterprise-design-system.yaml
-      status: approved
+      file: knowledge/development/DEV-002-enterprise-design-system.yaml
     - id: DEV-003
       title: Open Source Licensing and Public Repository Compliance
-      file: development/DEV-003-open-source-licensing.yaml
-      status: approved
+      file: knowledge/development/DEV-003-open-source-licensing.yaml
     - id: DEV-004
       title: Automated Verification & Continuous Testing Suite
-      file: development/DEV-004-automated-testing-standards.yaml
-      status: approved
+      file: knowledge/development/DEV-004-automated-testing-standards.yaml
     - id: DEV-005
       title: Token-Efficient Sparse Knowledge Protocol
-      file: development/DEV-005-token-efficient-sparse-knowledge-protocol.yaml
-      status: approved
+      file: knowledge/development/DEV-005-token-efficient-sparse-knowledge-protocol.yaml
   product:
     - id: PROD-001
       title: Turnkey Settings Page & Feature Toggle Control
-      file: product/PROD-001-configurable-module-settings.yaml
-      status: approved
+      file: knowledge/product/PROD-001-configurable-module-settings.yaml
     - id: PROD-002
       title: Clear Product Narrative & Interactive Onboarding UX
-      file: product/PROD-002-product-narrative-onboarding.yaml
-      status: approved
+      file: knowledge/product/PROD-002-product-narrative-onboarding.yaml
     - id: PROD-003
       title: Super Admin Tenant Provisioning & Separated Admin Architecture
-      file: product/PROD-003-super-admin-tenant-provisioning.yaml
-      status: approved
+      file: knowledge/product/PROD-003-super-admin-tenant-provisioning.yaml

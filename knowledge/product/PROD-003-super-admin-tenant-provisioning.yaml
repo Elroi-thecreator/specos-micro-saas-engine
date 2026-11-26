@@ -14,7 +14,7 @@ do:
   - Provide a dedicated `/super-admin` route with global tenant management, creation wizards, and cross-organization telemetry.
   - Implement dynamic section toggling (`showOverviewKpis`, `showLiveAgentFeed`, `showRiskMatrix`, `showQuickActions`, `showTokenMeter`) stored on each tenant's settings.
   - Expose individual application buttons in the workspace header for immediate access to active modules.
-  - Split tenant settings into structured administrative routes: `/w/[slug]/admin/general`, `/w/[slug]/admin/modules`, `/w/[slug]/admin/sections`, and `/w/[slug]/admin/billing`.
+  - "Split tenant settings into structured administrative routes: /w/[slug]/admin/general, /w/[slug]/admin/modules, /w/[slug]/admin/sections, and /w/[slug]/admin/billing."
   - Provide real-time live preview cards during tenant provisioning so administrators can see the exact layout before launch.
 dont:
   - Never allow regular tenant members access to `/super-admin` or cross-tenant modification operations.

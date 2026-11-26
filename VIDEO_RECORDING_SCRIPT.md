@@ -1,28 +1,32 @@
 # 🎬 SpecOS: Official 2-Minute Demo Video Recording Script & Teleprompter
 
-> **Target Duration:** 2 minutes to 2 minutes 30 seconds  
+> **Target Duration:** 2 minutes to 2 minutes 15 seconds (Hard limit: Under 3 minutes)  
 > **Recommended Screen Resolution:** 1920x1080 (Full HD), 16:9  
-> **Recommended Browser Zoom:** 100% or 110% (Clean Light Theme)  
+> **Recommended Browser Zoom:** 100% (Clean Light Theme)  
 > **Live App to Record:** [https://specos-micro-saas-engine.vercel.app](https://specos-micro-saas-engine.vercel.app)  
-> **GitHub Repo to Show:** [https://github.com/Elroi-thecreator/specos-micro-saas-engine](https://github.com/Elroi-thecreator/specos-micro-saas-engine)
+> **GitHub Repo to Show:** [https://github.com/Elroi-thecreator/specos-micro-saas-engine](https://github.com/Elroi-thecreator/specos-micro-saas-engine)  
+> **npm Package to Show:** [https://www.npmjs.com/package/specos-agent-kit](https://www.npmjs.com/package/specos-agent-kit)
+
+---
+
+## ⚡ Golden Rules for Kiroween Judges
+
+1. **Show the project working in the first 10 to 15 seconds:** Start right on the live simulator—click immediately!
+2. **Start already logged in:** Zero sign-up, login, or loading screens.
+3. **Make Kiro impossible to miss:** Show `/.kiro/specs/`, `/.kiro/steering/`, and `/.kiro/hooks/` on screen.
+4. **Hit the Judges' Desires:**
+   - **Vivek Velso (CTO & AWS Hero):** Show how a single core morphs into vertical SaaS products across 7 languages, solving enterprise SaaS fragmentation.
+   - **Floor Mesters (UX Lead, Kiro):** Point out the interactive **Kiro Ghost Guide 👻** ("Scare me, then make it easy!") and witty error handling.
+   - **Sameer Ali (Creator):** Highlight our open-source **`specos-agent-kit`** published on npm.
+5. **No live typing:** Paste or click directly. Use jump cuts to eliminate pauses.
 
 ---
 
 ## 🛠️ Step 0: Recording Setup (Takes 60 Seconds)
 
-### Option A: Windows Built-In Screen Recorder (Easiest & Free)
-1. Press `Win + Shift + R` (Windows Snipping Tool Screen Recorder) or `Win + G` (Xbox Game Bar).
-2. Ensure your microphone is enabled.
-3. Select your browser window containing `https://specos-micro-saas-engine.vercel.app`.
-
-### Option B: Streamlabs OBS (Already Installed on your PC)
-1. Launch `Streamlabs OBS` from your Start Menu.
-2. Add a **"Window Capture"** source and choose Google Chrome.
-3. Check your audio mixer and hit **"Start Recording"**.
-
-### Option C: Loom (One-Click Chrome Extension)
-1. Install the Loom Chrome extension or desktop app.
-2. Select **"Screen + Camera"** (or Screen only) and hit Record.
+* **Easiest Tool:** Press `Win + Shift + R` (Windows Snipping Tool Screen Recorder) or `Win + G` (Xbox Game Bar).
+* **Alternative:** Streamlabs OBS (Window Capture: Chrome) or Loom Chrome Extension.
+* **Audio Voiceover:** Speak with upbeat energy, or use Windows 11 Clipchamp (free Text-to-Speech: "Jenny" or "Guy" natural voice).
 
 ---
 
@@ -30,88 +34,88 @@
 
 ---
 
-### ⏱️ SCENE 1: The Hook & Value Proposition (0:00 - 0:25)
+### ⏱️ SCENE 1: Instant Working Demo & The Core Value (0:00 - 0:25)
+* **URL:** `https://specos-micro-saas-engine.vercel.app/` (Scrolled to the Interactive Simulator)
+* **Actions:**
+  1. (0:02) Start recording directly on the **"See How the AI Agents Actually Solve Problems"** section.
+  2. (0:05) Click the blue button: **"Simulate Legal Contract Audit"**.
+  3. (0:08) Watch the high-risk indemnification trap analysis appear instantly on screen!
+  4. (0:15) Click the **"🎧 Support Swarm"** tab & click **"Triage & Translate Ticket"** &rarr; Spanish reply appears!
+* **🗣️ Voiceover / Speak:**
+  > *"Hi everyone! This is SpecOS for Kiroween 2026. Within 8 seconds, our autonomous agent scanned a legal agreement, detected high-risk indemnification clauses, and triaged customer tickets across 7 languages.*
+  > 
+  > *Building B2B SaaS usually requires rebuilding multi-tenancy, rate limiting, and async queues from scratch. SpecOS solves this: one adaptable skeleton core that dynamically morphs into vertical AI SaaS apps purely through configuration."*
+
+---
+
+### ⏱️ SCENE 2: The Kiro Ghost Guide & Mischief-Resistant UX (0:25 - 0:45)
 * **URL:** `https://specos-micro-saas-engine.vercel.app/`
-* **On Screen:** Start at the very top of the homepage. Have your mouse hovered over the hero section.
 * **Actions:**
-  1. Scroll down smoothly to show the **3 Value Pillars** (*Legal & Contract AI*, *Customer Support Swarm*, *Code & Specs Auditor*).
+  1. Click the floating **"👻 Kiro Ghost Guide"** button in the bottom-right corner.
+  2. Show the popover card (*"Scare me, then make it easy!"* with 1-click judge teleport links).
+  3. Click **"⚡ Super Admin Provisioning"** directly inside the Ghost Guide &rarr; seamlessly transitions to `/super-admin?tab=new`!
 * **🗣️ Voiceover / Speak:**
-  > *"Hi everyone! This is SpecOS, built for Kiroween 2026 in the Skeleton Crew track. Traditional SaaS startups waste weeks rebuilding multi-tenancy, edge security, token rate limiting, and internationalization from scratch for every product.*
-  > 
-  > *SpecOS solves this with one adaptable skeleton core that dynamically transforms into completely distinct vertical AI SaaS products—from Japanese Legal AI to Spanish Customer Support—purely through an administrative control center."*
+  > *"Following Kiro UX judge Floor Mesters' advice—'Scare me, then make it easy'—we added our interactive Kiro Ghost Guide. With one click, judges can teleport straight into any capability without hunting."*
 
 ---
 
-### ⏱️ SCENE 2: Interactive Product Simulator (0:25 - 0:50)
-* **URL:** Scroll down to the **"See How the AI Agents Actually Solve Problems"** section.
-* **Actions:**
-  1. Under the simulator, click the **"⚖️ Legal & Contract AI"** tab.
-  2. Click the blue **"Simulate Legal Contract Audit"** button. Wait 1 second for the high-risk indemnification clause banner to appear.
-  3. Click the **"🎧 Support Swarm"** tab. Click **"Triage & Translate Ticket"** to show the Spanish translation and draft reply.
-* **🗣️ Voiceover / Speak:**
-  > *"Right on the homepage, judges and users can interact with our live simulator. For legal procurement, the contract agent flags indemnification traps in seconds.*
-  > 
-  > *For customer operations, our support swarm detects customer sentiment, translates across 7 languages, and drafts context-aware replies for 1-click human approval."*
-
----
-
-### ⏱️ SCENE 3: Platform Super Admin & Tenant Wizard (0:50 - 1:20)
-* **URL:** Click the **"Super Admin"** button in the top navbar &rarr; `https://specos-micro-saas-engine.vercel.app/super-admin`
+### ⏱️ SCENE 3: Super Admin Control Plane & Live Tenant Wizard (0:45 - 1:15)
+* **URL:** `https://specos-micro-saas-engine.vercel.app/super-admin`
 * **Actions:**
   1. Briefly show the **Organization Fleet Registry** table with active client workspaces (`LexisAI`, `DevShield`, `AtenciónGlobal`).
-  2. Click the purple tab: **"Provision New Tenant & Configure Sections"**.
-  3. Click the 1-click preset button: **"⚖️ Legal Tech Firm"** (or type a custom name).
-  4. Point your cursor to the **Live Workspace Preview** card on the right-hand side. Toggle a section checkbox (e.g. *Risk Governance Matrix*) and show the preview card instantly adapting.
+  2. Under the **"Provision New Tenant & Configure Sections"** tab, click **"⚖️ Legal Tech Firm"**.
+  3. Point your cursor to the **Live Workspace Preview** card on the right-hand side.
+  4. Toggle a section checkbox (e.g. *Executive KPI Metrics Ribbon*) and show the live preview card instantly re-rendering!
 * **🗣️ Voiceover / Speak:**
-  > *"Now, let's look at the control plane. In the Super Admin console, platform operators oversee all organizations with 100% RLS partition isolation.*
+  > *"In the Super Admin control console, operators oversee global tenant health with complete RLS partition isolation.*
   > 
-  > *When provisioning a new tenant, we can choose a 1-click industry template, customize brand colors, set token allowances, and use our granular Section Customizer to configure exactly what widgets appear on the dashboard. Notice the real-time preview card on the right updating live as we customize."*
+  > *When launching a new organization, our 1-click industry presets configure branding, language, and token quotas. Notice the real-time preview card on the right updating live as we customize dashboard sections."*
 
 ---
 
-### ⏱️ SCENE 4: Client Workspace & Asynchronous Worker Queue (1:20 - 1:45)
+### ⏱️ SCENE 4: Client Workspace & Asynchronous Worker Queue (1:15 - 1:40)
 * **URL:** Navigate to `/w/lexis-legal` &rarr; `https://specos-micro-saas-engine.vercel.app/w/lexis-legal`
 * **Actions:**
-  1. Point out the Japanese interface (`Lang: JA`) and custom branding color.
-  2. Click the separate **"Documents"** link in the top header &rarr; `/w/lexis-legal/documents`.
-  3. Click the teal **"Run Autonomous Legal Analysis"** button.
-  4. Highlight the green confirmation banner displaying the **Worker Queue Job ID (`job_*`)**.
+  1. Highlight the Japanese UI (`Lang: JA`) and custom brand color.
+  2. Click **"Documents"** in the top navigation header &rarr; `/w/lexis-legal/documents`.
+  3. Click **"Run Autonomous Legal Analysis"**.
+  4. Highlight the green confirmation banner with the **Worker Queue Job ID (`job_*`)**.
 * **🗣️ Voiceover / Speak:**
-  > *"Let's launch a client workspace: LexisAI Global Legal. Notice how the navigation, breadcrumbs, and metrics automatically reconfigure for Japanese legal operations.*
+  > *"Here is a live client workspace: LexisAI Global Legal. Notice how the entire interface and breadcrumbs reconfigured for Japanese legal operations.*
   > 
-  > *We also separated application links in the top header. When we audit a contract in the Documents application, the request is dispatched to our decoupled worker queue returning a verifiable job ID with atomic token debiting—guaranteeing horizontal scalability and zero serverless timeouts."*
+  > *When auditing contracts, requests are dispatched to our decoupled worker queue returning 202 Accepted with a verifiable Job ID and atomic token debiting—eliminating serverless timeouts completely."*
 
 ---
 
-### ⏱️ SCENE 5: Separated Admin & Dashboard Section Customizer (1:45 - 2:05)
-* **URL:** Click **"Admin"** in header &rarr; `/w/lexis-legal/admin/sections`
+### ⏱️ SCENE 5: Kiro Native Specs, Steering, & Published npm Package (1:40 - 2:05)
+* **URL:** Switch to GitHub tab (`https://github.com/Elroi-thecreator/specos-micro-saas-engine`) & npm tab
 * **Actions:**
-  1. Show the 4 separated admin tabs: *General & Branding*, *Modules & Swarms*, *Dashboard Sections*, and *Quota & Ledger*.
-  2. On the **Dashboard Sections** page, click **"Hide Section"** on the *Executive KPI Metrics Ribbon*.
-  3. Click **"&larr; View Live Dashboard with New Layout"** &rarr; show that the top metric cards are cleanly hidden!
+  1. Show the **`/.kiro`** directory in the repository:
+     - Open `.kiro/specs/specos/requirements.md`
+     - Open `.kiro/steering/tenancy-isolation.md`
+     - Open `.kiro/hooks/tenant-security-hook.json`
+  2. Switch to the npm tab: show **`specos-agent-kit`** (`https://www.npmjs.com/package/specos-agent-kit`).
 * **🗣️ Voiceover / Speak:**
-  > *"Unlike rigid SaaS platforms, SpecOS gives each tenant separated admin centers: Identity, AI Modules, Quota Ledgers, and Section Customization.*
+  > *"Behind the scenes, SpecOS was developed 100% natively with Kiro: formal requirements, design specs, steering rules enforcing strict tenant boundary isolation, and automated pre-commit security hooks.*
   > 
-  > *If an executive prefers a focused view without KPI ribbons, they simply toggle it off in the Section Customizer, and their dashboard updates instantly with zero redeployment."*
+  > *And to ensure this project outlives the hackathon, we published our core engine as an open-source npm package: `specos-agent-kit`—installable today by any developer worldwide."*
 
 ---
 
-### ⏱️ SCENE 6: Kiro Native Architecture & Wrap-Up (2:05 - 2:20)
-* **URL:** Switch to the GitHub tab &rarr; `https://github.com/Elroi-thecreator/specos-micro-saas-engine`
+### ⏱️ SCENE 6: Wrap-Up (2:05 - 2:15)
+* **URL:** Return to the live app (`https://specos-micro-saas-engine.vercel.app`)
 * **Actions:**
-  1. Show the root directory and click into the **`/.kiro`** directory (`specs/`, `steering/`, `hooks/`).
-  2. Show the `knowledge/` folder with `INJECTION.md`.
-  3. Return to the live Vercel tab with a smile!
+  1. Wave the mouse cursor over the live app with the Ghost Guide smiling.
 * **🗣️ Voiceover / Speak:**
-  > *"Behind the scenes, SpecOS was developed natively with Kiro: formal requirements, design docs, steering rules for tenant security, and automated hooks.*
-  > 
-  > *SpecOS is fully open-source on GitHub and deployed live on Vercel. Thank you for watching!"*
+  > *"SpecOS: One skeleton core, infinite AI SaaS applications. Live on Vercel, open source on GitHub. Thank you for watching!"*
 
 ---
 
-## 💡 Quick Tips for a Winning Hackathon Video
+## 🏆 Checklist for Recording Day
 
-1. **Keep it under 2 minutes 30 seconds:** Judges review dozens of submissions; crisp, high-tempo pacing always wins.
-2. **Audio Clarity:** Speak with energy. If you prefer not to record your voice, use **Windows 11 Clipchamp** (free app built into Windows) &rarr; paste the script above into **"Text to Speech"** and pick the "Jenny" or "Guy" natural voice.
-3. **Smooth Cursor Movements:** Avoid frantic mouse circles. Move deliberately to each button before clicking.
-4. **Thumbnail:** Capture a high-contrast screenshot of the homepage simulator or Super Admin wizard for your YouTube/Loom video thumbnail.
+- [ ] Video duration is **under 3 minutes** (Target: ~2:15).
+- [ ] First action happens **within 10-15 seconds** (Legal AI Simulator button clicked).
+- [ ] Kiro is visible on screen (Show `/.kiro` directory in GitHub).
+- [ ] No API keys shown (all masked or in `.env`).
+- [ ] Uploaded to YouTube as **Public** or **Unlisted**.
+- [ ] Paste YouTube link into the Devpost submission form!

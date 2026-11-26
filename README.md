@@ -3,22 +3,40 @@
 > **Kiroween 2026 Hackathon Submission** &bull; **Track:** *Skeleton Crew* &bull; **Eligible Bonus:** *Best Kiro Crew App*, *Best Startup Project*
 
 [![Built with Kiro](https://img.shields.io/badge/Built%20with-Kiro-emerald.svg)](https://kiro.dev)
+[![npm package](https://img.shields.io/npm/v/specos-agent-kit.svg?logo=npm&color=CB3837)](https://www.npmjs.com/package/specos-agent-kit)
 [![Vercel Deployed](https://img.shields.io/badge/Vercel-Production%20Live-black.svg?logo=vercel)](https://specos-micro-saas-engine.vercel.app/)
 [![Architecture Standards](https://img.shields.io/badge/Knowledge%20Base-ARCH--001%20%7C%20ARCH--002%20%7C%20ARCH--003-blue.svg)](./knowledge/)
 [![i18n Ready](https://img.shields.io/badge/i18n-7%20Locales%20%2B%20RTL-cyan.svg)](./src/lib/i18n/)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Elroi--thecreator%2Fspecos--micro--saas--engine-181717.svg?logo=github)](https://github.com/Elroi-thecreator/specos-micro-saas-engine)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-SpecOS is an enterprise-grade, multi-tenant B2B AI Micro-SaaS boilerplate and autonomous agent execution engine. Built for the **Skeleton Crew** track, it proves that a **single, adaptable skeleton core** can dynamically morph into completely distinct vertical SaaS applications (e.g. Legal Contract AI in Japanese, Customer Support Swarm in Spanish, or DevSecOps Spec Auditor in English) purely through an interactive **Capabilities & Settings control center**.
+---
+
+### ⚡ The 30-Second Test
+* **What it does:** SpecOS is an autonomous multi-tenant & multilingual micro-SaaS boilerplate where a single adaptable skeleton core dynamically morphs into completely distinct vertical AI applications (Japanese Legal AI, Spanish Customer Support, DevSecOps Code Auditor) purely via configuration.
+* **Who it is for:** Founders, engineering teams, and developers building B2B AI products who want to avoid spending weeks reinventing multi-tenancy, rate limiting, and asynchronous queuing boilerplate.
+* **Why it matters:** Eliminates SaaS fragmentation and architectural drift by grounding development in formal Kiro specifications and steering rules, backed by our published open-source npm package [`specos-agent-kit`](https://www.npmjs.com/package/specos-agent-kit).
+
+---
+
+SpecOS proves that a **single, adaptable skeleton core** can dynamically morph into completely distinct vertical SaaS applications purely through an interactive **Capabilities & Settings control center**.
 
 ---
 
 ## 🌐 Live Demo & Deployment
 * **Official Vercel Production:** [https://specos-micro-saas-engine.vercel.app](https://specos-micro-saas-engine.vercel.app)
+* **Published npm Package:** [https://www.npmjs.com/package/specos-agent-kit](https://www.npmjs.com/package/specos-agent-kit)
 * **Super Admin Control Plane:** [https://specos-micro-saas-engine.vercel.app/super-admin](https://specos-micro-saas-engine.vercel.app/super-admin)
 * **New Tenant Provisioning Wizard:** [https://specos-micro-saas-engine.vercel.app/super-admin?tab=new](https://specos-micro-saas-engine.vercel.app/super-admin?tab=new)
 * **Live Cloudflare Tunnel Fallback:** [https://witnesses-frozen-laser-reggae.trycloudflare.com](https://witnesses-frozen-laser-reggae.trycloudflare.com)
 * **Public GitHub Repository:** [https://github.com/Elroi-thecreator/specos-micro-saas-engine](https://github.com/Elroi-thecreator/specos-micro-saas-engine)
+
+---
+
+## 👻 Kiroween Mischief-Resistant UX ("Scare me, then make it easy")
+SpecOS incorporates interactive guidance and humorous error resilience specifically crafted for Kiroween judges:
+* **Interactive Kiro Ghost Guide (`GhostGuide`):** A floating skeleton companion in every workspace and on the homepage. Click it to open 1-click teleportation links to the Legal Contract Auditor, Support Swarm, Super Admin Wizard, or npm package.
+* **Spooky 404 Error Resilience (`not-found.tsx`):** If a user wanders into an invalid route, they are greeted by a playful ghost: *"The ghosts ate this route! Don't tremble—our Kiro steering rules prevented any cross-tenant leaks."* with immediate buttons to return to safety.
 
 ---
 

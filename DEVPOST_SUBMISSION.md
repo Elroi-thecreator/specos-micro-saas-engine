@@ -155,6 +155,13 @@ SpecOS is an autonomous multi-tenant operations platform powered by a coordinate
 ## 📖 Section 4: "About the project" (Main Story)
 
 ```markdown
+### ⚡ The 30-Second Summary
+* **What it does:** SpecOS is an autonomous multi-tenant & multilingual micro-SaaS engine where a single adaptable core dynamically morphs into vertical AI products (Japanese Legal AI, Spanish Support Swarm, DevSecOps Spec Auditor) purely via configuration.
+* **Who it is for:** Software founders, startup teams, and developers building B2B AI products who want to bypass weeks of repetitive multi-tenancy, token rate limiting, and async queuing boilerplate.
+* **Why it matters:** It transforms multi-tenant SaaS engineering from a multi-month development slog into a spec-driven, 1-click operation governed by formal Kiro steering rules—backed by our published open-source npm package `specos-agent-kit`.
+
+---
+
 ## Inspiration
 Modern enterprise software is plagued by tool fragmentation. A mid-sized company often juggles dozens of disconnected point solutions: one for legal contract review, another for multilingual customer support, and yet another for engineering compliance. Meanwhile, software teams building B2B Micro-SaaS applications repeatedly reinvent the wheel: multi-tenant database partitioning, edge routing, rate limiting, and internationalization.
 
@@ -173,20 +180,24 @@ SpecOS is an autonomous multi-tenant micro-SaaS operating system featuring:
    - 🎧 **Customer Support Swarm:** Ingests tickets across 7 languages, performs sentiment triage, and drafts contextual responses for 1-click human approval.
    - 🛡️ **Code Quality & Compliance Auditor:** Inspects Git repositories against architectural standards and Kiro steering directives.
 
-2. **Platform Super Admin Control Plane (`/super-admin`):**
+2. **👻 Delightful Ghost Guide & Mischief-Resistant UX (Kiroween Edition):**
+   - **Interactive Kiro Ghost Guide:** A floating skeleton companion in every workspace providing 1-click teleports to key judge flows (Legal Risk Simulation, Multilingual Support, Super Admin, and npm package).
+   - **Witty 404 & Error Handler:** A mischievous, smiling error experience (*"The ghosts ate this route! But don't tremble—our Kiro steering rules prevented any cross-tenant data leaks."*) that makes users smile while immediately showing them what to tap next.
+
+3. **Platform Super Admin Control Plane (`/super-admin`):**
    - Central fleet management with cross-organization telemetry (active swarms, token quotas, RLS partition health).
    - **Interactive Tenant Provisioning Wizard** with 1-click industry presets (*Legal Tech*, *DevSecOps*, *Support Swarm*, *Enterprise*) and an interactive real-time preview card that updates as you type.
 
-3. **Granular Dashboard Section Customizer (`/admin/sections`):**
+4. **Granular Dashboard Section Customizer (`/admin/sections`):**
    - Workspaces can independently toggle which widgets appear on their dashboard (Executive KPI Ribbon, Live Agent Activity Stream, Risk Governance Matrix, Quick Action Launchpad, Header Token Meter).
 
-4. **Separated Tenant Admin Centers:**
+5. **Separated Tenant Admin Centers:**
    - Disparate administrative duties are split into dedicated sub-centers: `/admin/general` (Branding & Locale), `/admin/modules` (AI Gates), `/admin/sections` (Layout), and `/admin/billing` (Token Budget & Rate Limits).
 
-5. **High-Scale Asynchronous Architecture (`specos-agent-kit`):**
+6. **High-Scale Asynchronous Architecture (`specos-agent-kit`):**
    - Powered by our published open-source npm package [`specos-agent-kit`](https://www.npmjs.com/package/specos-agent-kit): decoupled worker queue (`AgentQueueService`) returning `202 Accepted` with verifiable job IDs (`job_*`), bounded concurrency, exponential-backoff retries, crash recovery (`recoverJobs`), `AbortSignal` timeouts (`HybridAgentRuntime`), true sliding-window rate limits (60 req/min), and atomic `LedgerStore.tryDebit` quota enforcement.
 
-6. **Deep Multilingual Support (7 Locales + RTL):**
+7. **Deep Multilingual Support (7 Locales + RTL):**
    - Complete localized UI and agent prompt pipelines across English, Spanish, French, German, Japanese, Hindi, and Arabic (with automatic bidirectional `dir="rtl"` layout).
 
 ---
